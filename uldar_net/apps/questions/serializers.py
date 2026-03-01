@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 # Django imports
 
 # Rest Framework imports
-from rest_framework.serializers import ModelSerializer, CharField, IntegerField, TextField
+from rest_framework.serializers import ModelSerializer
 
 # Project imports
 from apps.questions.models import Question
@@ -24,7 +24,7 @@ class QuestionCreateSerializer(QuestionBaseSerializer):
     class Meta:
         """Meta class for QuestionCreateSerializer."""
         model = Question
-        fields = ['id', 'title', 'description', 'slug', 'tag', 'author']
+        fields = ['id', 'title', 'description', 'tag', 'author']
 
 class QuestionDetailSerializer(QuestionBaseSerializer):
     """Serializer for retrieving a question."""

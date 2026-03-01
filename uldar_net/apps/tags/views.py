@@ -19,9 +19,11 @@ from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_200_OK, HTTP_201_CRE
 # Project imports
 from apps.tags.models import Tag
 from apps.tags.serializers import TagCreateSerializer, TagDetailSerializer, TagListSerializer
-
+from apps.questions.models import Question
+from apps.questions.serializers import QuestionListSerializer
 
 class TagViewSet(ViewSet):
+    lookup_field = 'slug'
     permission_classes = [AllowAny,]
 
     def list(
@@ -80,17 +82,35 @@ class TagViewSet(ViewSet):
     def retrieve(
         self,
         request: DRFRequest,
-        pk: Optional[Union[int, str]] = None,
+        slug : str = None,
         *args: tuple[Any, ...],
         **kwargs: dict[str, Any]
     ) -> DRFResponse:
         """Retrieve a tag."""
+
+
+
+        try:
+            tag = Tag.objects.get(slug = slug)
+        except Tag.DoesNotExist:
+            return DRFResponse(
+                {"detail" : "Tag does not exist"},
+                status=HTTP_400_BAD_REQUEST
+            )
         
-        tag = Tag.objects.get(pk=pk)
         serializer = TagDetailSerializer(tag)
 
+        questions = Question.objects.filter(tag = tag)
+        questions_serializer = QuestionListSerializer(questions, many = True)
+
+
+
+
         return DRFResponse(
-            serializer.data,
+            {
+            "tag" : serializer.data,
+            "questions" : questions_serializer.data
+            },
             status=HTTP_200_OK
         )
     

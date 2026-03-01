@@ -16,6 +16,7 @@ from django.db.models import (Model,
 
 # Project imports
 from apps.tags.models import Tag
+from apps.users.models import User
 
 class Question(Model):
     """Model representing a question."""

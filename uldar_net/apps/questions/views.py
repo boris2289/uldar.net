@@ -1,7 +1,9 @@
 # Python imports
 from typing import Any, Dict, List, Optional, Tuple, Union
+import uuid
 
 # Django imports
+from django.utils.text import slugify
 
 # Rest Framework imports
 from rest_framework.viewsets import ViewSet
@@ -15,14 +17,11 @@ from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_200_OK, HTTP_201_CRE
 from apps.questions.models import Question
 from apps.questions.serializers import QuestionCreateSerializer, QuestionDetailSerializer, QuestionListSerializer
 from apps.tags.models import Tag
+from apps.tags.serializers import TagDetailSerializer
 
 
 class QuestionViewSet(ViewSet):
-    @action(
-        methods=('GET', ),
-        permission_classes = (AllowAny, ),
-        
-    )
+
     
     def list(
         self,
@@ -36,17 +35,13 @@ class QuestionViewSet(ViewSet):
 
         return DRFResponse(
             serializer.data
-            ,{"detail" : "All questions succesfully listed"},
+            ,
+            {"detail" : "All questions succesfully listed"},
             status=HTTP_200_OK
         )
     
 
-    @action(
-            
-        methods = ('GET', ),
-        permission_classes = (AllowAny, ),
-        detail = True,
-    )
+
     def retrieve(
         self,
         request: DRFRequest,
@@ -70,12 +65,6 @@ class QuestionViewSet(ViewSet):
         )
     
     
-    @action(
-        methods=('DELETE', ),
-        permission_classes = (IsAuthenticated, ),
-        detail=True
-    )
-
     def destroy(
         self,
         request : DRFRequest,
@@ -103,6 +92,43 @@ class QuestionViewSet(ViewSet):
 
         return DRFResponse(
             status=HTTP_204_NO_CONTENT
+        )
+    
+    
+    def create(
+        self,
+        request: DRFRequest,
+        *args: tuple[Any, ...],
+        **kwargs: dict[str, Any]
+    ) -> DRFResponse:
+        """Create a new question."""
+        
+
+
+        serializer = QuestionCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        data = serializer.validated_data
+
+        def generate_unique_slug(title):
+            base_slug = slugify(title)
+            slug = base_slug
+            while Question.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+            return slug
+        
+        question : Question = Question.objects.create(
+            title = data['title'],
+            description = data['description'],
+            slug = generate_unique_slug(data['title']),
+            author = data['author'],
+        )
+
+        question.tag.set(data['tag'])
+
+        return DRFResponse(
+            QuestionDetailSerializer(question).data,
+            status = HTTP_201_CREATED
         )
 
 
