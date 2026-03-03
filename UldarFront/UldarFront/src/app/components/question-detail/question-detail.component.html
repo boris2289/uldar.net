@@ -1,0 +1,39 @@
+<div class="question-page container">
+  <button backButton class="btn btn-outline-dark mb-3">← Back</button>
+
+  <div *ngIf="usernameFromToken === user.username" class="mb-3">
+    <button class="btn btn-primary me-2" (click)="edit()">Update</button>
+    <button class="btn btn-danger" (click)="delete()">Delete</button>
+  </div>
+
+  <div *ngIf="question" class="question-block shadow-sm">
+    <h2 class="question-title">{{ question.title }}</h2>
+    <p class="question-meta">{{ question.created | date: "HH:mm, dd/MM/yyyy" }}</p>
+    <hr />
+    <p class="question-body">{{ question.body }}</p>
+    <pre *ngIf="question.code_field" class="code-block"><code>{{ question.code_field }}</code></pre>
+
+    <div class="meta-info">
+      <span>👤 <a [routerLink]="['/users', user.username]" class="username">@{{ user.username }}</a></span>
+      <span>🏷️ <a [routerLink]="['/tags', tag.name]" class="tag">{{ tag.name }}</a></span>
+    </div>
+  </div>
+
+  <div *ngIf="usernameFromToken" class="answer-form">
+    <h4 class="mb-3">💬 Your Answer</h4>
+    <form (ngSubmit)="addMessage()">
+      <textarea [(ngModel)]="body" [ngModelOptions]="{ standalone: true }" placeholder="Type your Position" rows="4"></textarea>
+      <textarea [(ngModel)]="code" [ngModelOptions]="{ standalone: true }" placeholder="Type your Number" rows="4"></textarea>
+      <button type="submit" class="btn btn-primary">Answer</button>
+    </form>
+  </div>
+
+  <div *ngFor="let message of messages" class="answer-block shadow-sm">
+    <div class="answer-header">
+      <a [routerLink]="['/users', message.user]" class="username">@{{ message.user }}</a>
+      <small class="text-muted">{{ message.created | date: "HH:mm, dd/MM/yyyy" }}</small>
+    </div>
+    <p class="answer-body">{{ message.body }}</p>
+    <pre *ngIf="message.code_field" class="code-block"><code>{{ message.code_field }}</code></pre>
+  </div>
+</div>

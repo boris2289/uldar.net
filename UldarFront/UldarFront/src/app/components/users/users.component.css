@@ -1,0 +1,49 @@
+.user-list-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+}
+
+.user-card {
+  background: #e9f2ff;
+  border-radius: 12px;
+  width: 200px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 123, 255, 0.15);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.user-card:hover {
+  transform: translateY(-5px);
+}
+
+.user-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.5rem;
+  border: 3px solid #0d6efd;
+}
+
+.username {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.username:hover {
+  text-decoration: underline;
+}
+
+.email {
+  font-size: 0.9rem;
+  color: #495057;
+  margin-top: 0.3rem;
+}
