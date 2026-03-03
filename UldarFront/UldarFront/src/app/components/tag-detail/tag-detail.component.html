@@ -1,0 +1,19 @@
+<div *ngIf="tag" class="tag-detail container">
+  <button backButton class="btn btn-outline-primary mb-4">← Back to Tags</button>
+
+  <div class="tag-info">
+    <h2 class="tag-title">#{{ tag.name }}</h2>
+    <p class="tag-description">{{ tag.description || 'No description available for this tag yet.' }}</p>
+  </div>
+
+  <div class="question-list">
+    <div *ngFor="let question of questions" class="question-card shadow-sm">
+      <a [routerLink]="['/questions', question.id]" class="question-link">
+        <h5>{{ question.title }}</h5>
+      </a>
+    </div>
+    <div *ngIf="questions.length === 0" class="no-questions-msg">
+      <h5>🤷 No questions have been asked with this tag yet.</h5>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,49 @@
+.tag-detail {
+    font-family: 'Poppins', sans-serif;
+    max-width: 900px;
+    margin: 2rem auto;
+  }
+  
+  .tag-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #0d6efd;
+    margin-bottom: 0.3rem;
+  }
+  
+  .tag-description {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-bottom: 2rem;
+  }
+  
+  .question-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .question-card {
+    background-color: #f8f9ff;
+    padding: 1rem 1.2rem;
+    border-radius: 12px;
+    border: 1px solid #cfe2ff;
+    transition: box-shadow 0.2s ease;
+  }
+  
+  .question-card:hover {
+    box-shadow: 0 6px 15px rgba(13, 110, 253, 0.1);
+  }
+  
+  .question-link {
+    text-decoration: none;
+    color: #0d6efd;
+    font-weight: 500;
+  }
+  
+  .no-questions-msg {
+    text-align: center;
+    margin-top: 2rem;
+    color: #6c757d;
+  }
+  
