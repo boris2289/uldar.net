@@ -26,7 +26,13 @@ class TagViewSet(ViewSet):
     lookup_field = 'slug'
     permission_classes = [AllowAny,]
 
-    def list(
+    @action(
+    methods=("GET",),
+    permission_classes = (AllowAny,),
+    detail=False,
+    url_path='list'
+    )
+    def list_tags(
         self,
         request: DRFRequest,
         *args: tuple[Any, ...],
@@ -42,8 +48,13 @@ class TagViewSet(ViewSet):
             status=HTTP_200_OK
         )    
 
-
-    def create(
+    @action(
+    methods=("POST",),
+    permission_classes = (IsAuthenticated,),
+    detail=False,
+    url_path='create'
+    )
+    def create_tag(
         self,
         request: DRFRequest,
         *args: tuple[Any, ...],
@@ -78,8 +89,13 @@ class TagViewSet(ViewSet):
                 status=HTTP_201_CREATED
             )
     
-
-    def retrieve(
+    @action(
+    methods=("GET",),
+    permission_classes = (AllowAny,),
+    detail=True,
+    url_path='retrieve'
+    )
+    def retrieve_tag(
         self,
         request: DRFRequest,
         slug : str = None,
@@ -114,21 +130,5 @@ class TagViewSet(ViewSet):
             status=HTTP_200_OK
         )
     
-    def destroy(
-        self,
-        request: DRFRequest,
-        pk: Optional[Union[int, str]] = None,
-        *args: tuple[Any, ...],
-        **kwargs: dict[str, Any]
-    ) -> DRFResponse:
-        """Delete a tag."""
-        
-        tag = Tag.objects.get(pk=pk)
-        tag.delete()
-        return DRFResponse(
-            {
-                "detail": "Tag deleted successfully.",
-                
-            }, status = HTTP_204_NO_CONTENT
-        )
+
     

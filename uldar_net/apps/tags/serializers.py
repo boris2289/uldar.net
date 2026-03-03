@@ -42,3 +42,4 @@ class TagListSerializer(TagBaseSerializer):
         """Meta class for TagListSerializer."""
         model = Tag
         fields = ['id', 'name', 'slug']
+

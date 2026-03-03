@@ -42,7 +42,8 @@ class Question(Model):
     tag = ManyToManyField(
         Tag,
         related_name='questions',
-        help_text='The tags of the question.'
+        help_text='The tags of the question.',
+        blank=True,
     )
 
     created_at = DateTimeField(
