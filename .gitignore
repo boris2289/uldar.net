@@ -5,3 +5,6 @@ __pycache__/
 venv/
 
 uldar_net/db.sqlite3
+
+
+.idea/

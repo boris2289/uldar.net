@@ -20,8 +20,8 @@ import { PasswordChangeComponent } from './components/password-change/password-c
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'questions', component: QuestionsComponent },
-  { path: 'questions/:questionSlug', component: QuestionDetailComponent },
-  { path: 'questions/:questionID/edit', component: EditQuestionComponent, canActivate: [AuthGuardService], },
+  { path: 'questions/:questionSlug/', component: QuestionDetailComponent },
+  { path: 'questions/:questionSlug/edit', component: EditQuestionComponent, canActivate: [AuthGuardService], },
   { path: 'tags', component: TagsComponent },
   { path: 'tags/:tagName', component: TagDetailComponent },
   { path: 'login', component: LoginPageComponent },
