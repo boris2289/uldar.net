@@ -1,48 +1,52 @@
 <form>
     <h2>Edit Question</h2>
     <div class="main_block">
-      <div class="block">
-        <h4>Title</h4>
-        <h6>Be specific and imagine you're asking a question to another person</h6>
-        <input [(ngModel)]="title" [ngModelOptions]="{ standalone: true }" type="text" placeholder="e.g. Is there a Python function to find the certain symbol of string?"
-               id="title" value="{{title}}"/>
-        <p *ngIf="title_empty">Write a question!</p>
-      </div>
-      <div class="block">
-        <h4>Body</h4>
-        <h6>Include all the information about your question</h6>
-        <textarea cols="30" rows="10" id="body" [(ngModel)]="body" [ngModelOptions]="{ standalone: true }"
-                  placeholder="I have a problem with realization!" value="{{body}}"></textarea>
-        <p *ngIf="body_empty">Explain the question!</p>
-      </div>
-      <div class="block">
-        <h4>Location</h4>
-        <h6>Location and Number</h6>
-        <textarea cols="30" rows="10" id="codefield" [(ngModel)]="codefield" [ngModelOptions]="{ standalone: true }"
-                  placeholder="print(sum(array))?" value="{{codefield}}"></textarea>
-      </div>
-      <div class="block">
-        <div class="sub_block">
-          <h4>Tag</h4>
-          <h6>Choose a tag of your question</h6>
-          <select [(ngModel)]="tagFromForm" [ngModelOptions]="{ standalone: true }">
-            <option>{{this.tag}}: {{ this.tagName }}</option>
-            <option *ngFor="let t of tags">{{ t.id }}: {{ t.name }}</option>
-          </select>
-          <p *ngIf="tag_empty">Choose the tag!</p>
+        <div class="block">
+            <h4>Title</h4>
+            <h6>Be specific and imagine you're asking a question to another person</h6>
+            <input [(ngModel)]="title" [ngModelOptions]="{ standalone: true }" type="text" placeholder="e.g. Is there a Python function to find the certain symbol of string?" id="title" value="{{title}}" />
+            <p *ngIf="title_empty">Write a question!</p>
         </div>
-      </div>
-      <button type="submit" (click)="check()" class="btn btn-lg btn-primary" id="submit">
+        <div class="block">
+            <h4>Body</h4>
+            <h6>Include all the information about your question</h6>
+            <textarea cols="30" rows="10" id="body" [(ngModel)]="description" [ngModelOptions]="{ standalone: true }" placeholder="I have a problem with realization!" value="{{description}}"></textarea>
+            <p *ngIf="description_empty">Explain the question!</p>
+        </div>
+        <div class="block">
+            <h4>Location</h4>
+            <h6>Location and Number</h6>
+            <textarea cols="30" rows="10" id="codefield" [(ngModel)]="codefield" [ngModelOptions]="{ standalone: true }" placeholder="print(sum(array))?" value="{{codefield}}"></textarea>
+        </div>
+        <div class="block">
+            <div class="sub_block">
+                <h4>Tag</h4>
+                <h6>Choose a tag of your question</h6>
+                <select [(ngModel)]="selectedTagId" [ngModelOptions]="{ standalone: true }">
+
+              <option [ngValue]="selectedTagId">
+                {{ selectedTagId }} : {{ tagName }}
+              </option>
+
+              <option *ngFor="let t of tags" [ngValue]="t.id">
+                {{ t.id }} : {{ t.name }}
+              </option>
+
+            </select>
+                <p *ngIf="tag_empty">Choose the tag!</p>
+            </div>
+        </div>
+        <button type="submit" (click)="check()" class="btn btn-lg btn-primary" id="submit">
          Submit
       </button>
-      <div *ngIf="isCompleted">
-        <h5>Are you sure there is no such Announcement on our site?</h5>
-        <button type="submit" (click)="editquestion()" class="btn btn-lg btn-primary subm_part">
+        <div *ngIf="isCompleted">
+            <h5>Are you sure there is no such Announcement on our site?</h5>
+            <button type="submit" (click)="editquestion()" class="btn btn-lg btn-primary subm_part">
           Yes
         </button>
-        <button type="submit" (click)="recheck()" class="subm_part btn btn-lg btn-primary">
+            <button type="submit" (click)="recheck()" class="subm_part btn btn-lg btn-primary">
           No, need to change my Announcement
         </button>
-      </div>
+        </div>
     </div>
-  </form>
+</form>

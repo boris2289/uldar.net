@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Questions, question_list } from '../../../test_backend/questions';
+import { Questions } from 'src/app/models';
 import { QuestionsService } from 'src/app/services/questions.service';
 import { ServiceService } from 'src/app/services/service.service';
 
@@ -24,8 +24,8 @@ export class QuestionsComponent implements OnInit {
       this.questions = questions;
       this.questions.sort((q1, q2) => {
         return (
-          new Date(q2.created).getTime() -
-          new Date(q1.created).getTime()
+          new Date(q2.created_at).getTime() -
+          new Date(q1.created_at).getTime()
         );
       });
     });

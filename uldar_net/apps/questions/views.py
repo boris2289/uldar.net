@@ -19,6 +19,11 @@ from apps.questions.models import Question
 from apps.questions.serializers import QuestionCreateSerializer, QuestionDetailSerializer, QuestionListSerializer, QuestionUpdateSerializer
 from apps.tags.models import Tag
 from apps.tags.serializers import TagDetailSerializer
+from apps.comments.serializers import CommentListSerializer
+from apps.comments.models import Comments
+from apps.comments.serializers import CommentListSerializer, CommentCreateSerializer
+
+
 
 
 class QuestionViewSet(ViewSet):
@@ -68,9 +73,17 @@ class QuestionViewSet(ViewSet):
             )
 
         serializer : QuestionDetailSerializer = QuestionDetailSerializer(question)
+        
+        comments : List[Comments] = Comments.objects.filter(question = question) 
+
+        comment_serializer : CommentListSerializer = CommentListSerializer(comments, many = True)
+        # comments : CommentListSerializer = 
 
         return DRFResponse(
-            serializer.data,
+            {
+                "question" : serializer.data,
+                "comments" : comment_serializer.data
+            },
             status=HTTP_200_OK
         )
     
@@ -125,7 +138,7 @@ class QuestionViewSet(ViewSet):
         
 
 
-        serializer = QuestionCreateSerializer(data=request.data)
+        serializer: QuestionCreateSerializer = QuestionCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         data = serializer.validated_data
@@ -208,9 +221,36 @@ class QuestionViewSet(ViewSet):
             },
             status=HTTP_200_OK
     )
+    @action(
+        url_path="create_comment",
+        detail=True,
+        permission_classes=(IsAuthenticated,),
+        methods=("POST",)
+    )
+    def create_comment(
+        self,
+        request: DRFRequest,
+        slug: None,
+        *args : tuple[Any, ...],
+        **kwargs: dict[str, Any]
+    ) -> DRFResponse:
+        """Create a comment method"""
+        
+        serializer : CommentCreateSerializer = CommentCreateSerializer(data = request.data)
+        serializer.is_valid(raise_exception=True)
 
-            
+        data = serializer.validated_data
 
+        comment : Comments = Comments.objects.create(
+            text = data['text'],
+            author = data['author'],
+            question = data['question']
+        )
+
+        return DRFResponse(
+            serializer.data,
+            status= HTTP_200_OK
+        )
 
 
 

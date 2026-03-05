@@ -2,13 +2,13 @@
     <button backButton class="btn btn-outline-primary mb-4">← Back to Tags</button>
 
     <div class="tag-info">
-        <h2 class="tag-title">#{{ tag.name }}</h2>
-        <p class="tag-description">{{ tag.description || 'No description available for this tag yet.' }}</p>
+        <h2 class="tag-title">#{{tag.name}}</h2>
+
     </div>
 
     <div class="question-list">
         <div *ngFor="let question of questions" class="question-card shadow-sm">
-            <a [routerLink]="['/questions', question.id]" class="question-link">
+            <a [routerLink]="['/questions', question.slug]" class="question-link">
                 <h5>{{ question.title }}</h5>
             </a>
         </div>

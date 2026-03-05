@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Tags } from '../../../test_backend/tags';
+import { Tags } from 'src/app/models';
 import { ServiceService } from 'src/app/services/service.service';
 
 @Component({

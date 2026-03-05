@@ -37,7 +37,7 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
     class Meta:
         """Meta class for QuestionDetailSerializer."""
         model = Question
-        fields = ['id', 'title', 'description', 'slug', 'tag', 'author']
+        fields = ['id', 'title', 'description', 'slug', 'tag', 'author', 'created_at']
 
 class QuestionListSerializer(QuestionBaseSerializer):
     """Serializer for a list of questions."""

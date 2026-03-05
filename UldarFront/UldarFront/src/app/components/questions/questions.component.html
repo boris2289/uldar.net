@@ -12,7 +12,8 @@
             <a [routerLink]="['/questions', question.slug]" class="question-link">
                 <div class="question-content">
                     <h5>{{ question.title }}</h5>
-                    <small class="date">{{ question.created | date: 'HH:mm, dd/MM/yyyy' }}</small>
+                    <small class="date">{{ question.created_at | date: 'HH:mm, dd/MM/yyyy' }}</small>
+
                 </div>
             </a>
         </div>

@@ -1,34 +1,65 @@
-<div class="question-page container">
-    <button backButton class="btn btn-outline-dark mb-3">← Back</button>
+<div class="question-page" *ngIf="question">
 
+    <div class="question-block">
 
-    <div *ngIf="question" class="question-block shadow-sm">
-        <h2 class="question-title">{{ question.title }}</h2>
-        <p class="question-meta">{{ question.created | date: "HH:mm, dd/MM/yyyy" }}</p>
-        <hr />
-        <p class="question-body">{{ question.body }}</p>
-        <pre *ngIf="question.code_field" class="code-block"><code>{{ question.code_field }}</code></pre>
+        <h2 class="question-title">
+            {{ question.title }}
+        </h2>
+
+        <div class="question-meta">
+            Asked by
+            <a class="username">
+        {{ user?.email }}
+      </a> • {{ question.created_at | date:'dd MMM yyyy HH:mm' }}
+        </div>
+
+        <div class="question-body">
+            {{ question.description }}
+        </div>
 
         <div class="meta-info">
-            <span>🏷️ <a [routerLink]="['/tags', tag.name]" class="tag">{{ tag.name }}</a></span>
+
+            <div>
+                <span *ngFor="let tag of tagsForQuestion">
+
+          <a class="tag" [routerLink]="['/tags', tag.slug]">
+            🏷️ {{ tag.name }}
+          </a>
+
+        </span>
+            </div>
+
         </div>
+
     </div>
 
-    <div *ngIf="usernameFromToken" class="answer-form">
-        <h4 class="mb-3">💬 Your Answer</h4>
-        <form (ngSubmit)="addMessage()">
-            <textarea [(ngModel)]="body" [ngModelOptions]="{ standalone: true }" placeholder="Type your Position" rows="4"></textarea>
-            <textarea [(ngModel)]="code" [ngModelOptions]="{ standalone: true }" placeholder="Type your Number" rows="4"></textarea>
-            <button type="submit" class="btn btn-primary">Answer</button>
-        </form>
+
+    <!-- COMMENTS -->
+
+    <div class="answer-block" *ngFor="let comment of comments">
+
+        <div class="answer-body">
+            {{ comment.text }}
+        </div>
+
+
     </div>
 
-    <div *ngFor="let message of messages" class="answer-block shadow-sm">
-        <div class="answer-header">
-            <a [routerLink]="['/users', message.user]" class="username">@{{ message.user }}</a>
-            <small class="text-muted">{{ message.created | date: "HH:mm, dd/MM/yyyy" }}</small>
-        </div>
-        <p class="answer-body">{{ message.body }}</p>
-        <pre *ngIf="message.code_field" class="code-block"><code>{{ message.code_field }}</code></pre>
+    <div class="add-comment" *ngIf="question">
+
+        <h3>Leave a comment</h3>
+
+        <textarea [(ngModel)]="commentText" [ngModelOptions]="{ standalone: true }" placeholder="Write your comment..." rows="4" [disabled]="!isAuthenticated">
+    </textarea>
+
+        <br>
+
+        <button (click)="postComment()" class="btn btn-primary" [disabled]="!isAuthenticated">
+        Post Comment
+        </button>
+
+        <p *ngIf="!isAuthenticated" style="color: gray;">
+            You must be logged in to leave a comment
+        </p>
+
     </div>
-</div>

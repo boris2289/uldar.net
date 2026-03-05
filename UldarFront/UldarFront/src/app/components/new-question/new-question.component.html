@@ -1,46 +1,55 @@
 <form>
-  <h2>Announcement</h2>
-  <div class="main_block">
-    <div class="block">
-      <h4>Title</h4>
-      <h6>Be specific and imagine you're uploading announcement to ULDAR</h6>
-      <input [(ngModel)]="title" [ngModelOptions]="{ standalone: true }" type="text" placeholder="Go play football" id="title"/>
-      <p *ngIf="title_empty">Write a announcenment!</p>
+    <h2>Announcement</h2>
+
+    <div class="main_block">
+
+        <div class="block">
+            <h4>Title</h4>
+            <input [(ngModel)]="title" [ngModelOptions]="{ standalone: true }" type="text" placeholder="Go play football" />
+            <p *ngIf="title_empty">Write a announcement!</p>
+        </div>
+
+        <div class="block">
+            <h4>Description</h4>
+            <textarea rows="8" [(ngModel)]="description" [ngModelOptions]="{ standalone: true }" placeholder="We will play football!">
+            </textarea>
+            <p *ngIf="description_empty">Explain the question!</p>
+        </div>
+
+        <!-- TAGS -->
+        <div class="block">
+
+            <h4>Tags</h4>
+            <h6>Write tags like hashtags</h6>
+
+            <div *ngFor="let t of tagInputs; let i = index; trackBy: trackByIndex">
+
+                <input [(ngModel)]="tagInputs[i]" [ngModelOptions]="{ standalone: true }" placeholder="#football" />
+
+            </div>
+
+            <button type="button" (click)="addTag()">➕ Add tag</button>
+
+        </div>
+
+        <button type="button" (click)="check()" class="btn btn-lg btn-primary">
+            Submit
+        </button>
+
+        <div *ngIf="isCompleted">
+
+            <h5>Are you sure there is no such announcement?</h5>
+
+            <button type="button" (click)="newquestion()" class="btn btn-lg btn-primary">
+                Yes
+            </button>
+
+            <button type="button" (click)="recheck()" class="btn btn-lg btn-primary">
+                No
+            </button>
+
+        </div>
+
     </div>
-    <div class="block">
-      <h4>Description</h4>
-      <h6>What it will be?</h6>
-      <textarea cols="30" rows="10" id="body" [(ngModel)]="body" [ngModelOptions]="{ standalone: true }"
-                placeholder="We will play football!"></textarea>
-      <p *ngIf="body_empty">Explain the question!</p>
-    </div>
-    <div class="block">
-      <h4>Place and Contacts</h4>
-      <h6>Include the full name of the car</h6>
-      <textarea cols="30" rows="10" id="codefield" [(ngModel)]="codefield" [ngModelOptions]="{ standalone: true }"
-                placeholder="Almaty arena whatsapp 877712805898"></textarea>
-    </div>
-    <div class="block">
-      <div class="sub_block">
-        <h4>Tag</h4>
-        <h6>Choose a tag of your Sport</h6>
-        <select [(ngModel)]="tag" [ngModelOptions]="{ standalone: true }">
-          <option *ngFor="let t of tags">{{ t.id }}: {{ t.name }}</option>
-        </select>
-        <p *ngIf="tag_empty">Choose the tag!</p>
-      </div>
-    </div>
-    <button type="submit" (click)="check()" class="btn btn-lg btn-primary" id="submit">
-       Submit
-    </button>
-    <div *ngIf="isCompleted">
-      <h5>Are you sure there is no such Anoouncement on our site?</h5>
-      <button type="submit" (click)="newquestion()" class="btn btn-lg btn-primary subm_part">
-        Yes
-      </button>
-      <button type="submit" (click)="recheck()" class="subm_part btn btn-lg btn-primary">
-        No, need to change my Announcement
-      </button>
-    </div>
-  </div>
+
 </form>

@@ -25,6 +25,7 @@ export class AppComponent implements OnInit{
   logout(){
     this.logged=false;
     localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
     this.router.navigateByUrl('questions').then()
     // location.reload();
   }

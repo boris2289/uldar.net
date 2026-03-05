@@ -1,13 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Questions, question_list } from '../../test_backend/questions';
 import { Observable, of } from 'rxjs';
 import { JwtHelperService } from "@auth0/angular-jwt";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Messages } from 'src/test_backend/messages';
-import { Tags } from 'src/test_backend/tags';
-import { Users } from 'src/test_backend/users';
 import { AuthToken } from '../models';
 import { Router } from "@angular/router";
+import { Tags, TagDetailResponse,Comments, Users, } from '../models';
 
 const helper = new JwtHelperService();
 
@@ -30,24 +27,27 @@ export class ServiceService {
   //   return this.http.get<Tags>(`${this.base_url}/tags/${id}/`);
   // }
 
-  getTag(name: string): Observable<Tags> {
-    return this.http.get<Tags>(`${this.base_url}tags/${name}/retrieve`);
+  getTag(name: string): Observable<TagDetailResponse> {
+    return this.http.get<TagDetailResponse>(`${this.base_url}tags/${name}/retrieve`);
   }
 
-  getMessages(): Observable<Messages[]> {
-    return this.http.get<Messages[]>(`${this.base_url}questions/list`);
+  createTag(name: string): Observable<Tags> {
+    return this.http.post<Tags>(`${this.base_url}tags/create`, {
+      name: name
+    });
   }
+  
 
-  addMessage(id:number, data: any): Observable<Messages> {
-    return this.http.post<Messages>(`${this.base_url}/questions/${id}/messages/`, data)
+  addComment(slug : string, data: any): Observable<Comments> {
+    return this.http.post<Comments>(`${this.base_url}questions/${slug}/create_comment`, data)
   }
 
   getUsers(): Observable<Users[]> {
     return this.http.get<Users[]>(`${this.base_url}/users`);
   }
 
-  getUser(username: string): Observable<Users> {
-    return this.http.get<Users>(`${this.base_url}/users/${username}/`);
+  getUser(id : number): Observable<Users> {
+    return this.http.get<Users>(`${this.base_url}users/${id}/`);
   }
 
   login(email: string, password: string) {

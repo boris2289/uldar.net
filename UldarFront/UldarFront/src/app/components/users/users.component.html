@@ -1,10 +1,9 @@
 <div class="user-list-container">
     <div class="user-card" *ngFor="let user of users">
-        <a [routerLink]="['/users', user.username]">
-            <img [src]="user.avatar" [alt]="user.username" class="user-avatar" />
+        <a [routerLink]="['/users', user.email]">
         </a>
         <div class="user-info">
-            <a [routerLink]="['/users', user.username]" class="username">{{ user.username }}</a>
+            <a [routerLink]="['/users', user.email]" class="username">{{ user.email }}</a>
             <p class="email">{{ user.email }}</p>
         </div>
     </div>

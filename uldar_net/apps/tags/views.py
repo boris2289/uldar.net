@@ -24,11 +24,10 @@ from apps.questions.serializers import QuestionListSerializer
 
 class TagViewSet(ViewSet):
     lookup_field = 'slug'
-    permission_classes = [AllowAny,]
 
     @action(
     methods=("GET",),
-    permission_classes = (AllowAny,),
+    permission_classes = [IsAuthenticatedOrReadOnly,],
     detail=False,
     url_path='list'
     )
@@ -114,9 +113,9 @@ class TagViewSet(ViewSet):
                 status=HTTP_400_BAD_REQUEST
             )
         
-        serializer = TagDetailSerializer(tag)
+        serializer : TagDetailSerializer = TagDetailSerializer(tag)
 
-        questions = Question.objects.filter(tag = tag)
+        questions : List[Question] = Question.objects.filter(tag = tag)
         questions_serializer = QuestionListSerializer(questions, many = True)
 
 

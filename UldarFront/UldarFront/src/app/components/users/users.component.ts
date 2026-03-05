@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Users, users_list } from 'src/test_backend/users';
-
+import { Users } from 'src/app/models';
 import { ServiceService } from 'src/app/services/service.service';
 
 @Component({
