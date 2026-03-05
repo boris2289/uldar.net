@@ -17,13 +17,13 @@ const helper = new JwtHelperService();
 
 export class ServiceService {
   //private apiURL = 'http://localhost:5000';
-  private base_url='http://localhost:8000/api';
+  private base_url='http://127.0.0.1:8000/api/';
 
   constructor(private http: HttpClient, private router: Router) {
   }
 
   getTags(): Observable<Tags[]> {
-    return this.http.get<Tags[]>(`${this.base_url}/tags`);
+    return this.http.get<Tags[]>(`${this.base_url}tags/list`);
   }
 
   // getTag(id: number): Observable<Tags> {
@@ -31,11 +31,11 @@ export class ServiceService {
   // }
 
   getTag(name: string): Observable<Tags> {
-    return this.http.get<Tags>(`${this.base_url}/tags/${name}/`);
+    return this.http.get<Tags>(`${this.base_url}tags/${name}/retrieve`);
   }
 
-  getMessages(id:number): Observable<Messages[]> {
-    return this.http.get<Messages[]>(`${this.base_url}/questions/${id}/messages`);
+  getMessages(): Observable<Messages[]> {
+    return this.http.get<Messages[]>(`${this.base_url}questions/list`);
   }
 
   addMessage(id:number, data: any): Observable<Messages> {
@@ -51,14 +51,14 @@ export class ServiceService {
   }
 
   login(email: string, password: string) {
-    return this.http.post<any>('http://127.0.0.1:8000/api/login/', {
+    return this.http.post<any>(`${this.base_url}login/`, {
       email: email,
       password: password
     });
   }
 
   register(data: any): Observable<Users> {
-    return this.http.post<Users>(`${this.base_url}/users/`, data)
+    return this.http.post<Users>(`${this.base_url}register/`, data)
   }
 
   changePassword(username: string, data: any):Observable<null>{

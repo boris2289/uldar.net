@@ -19,6 +19,7 @@ export class NewQuestionComponent implements OnInit {
   user: Users | undefined;
   title = '';
   body = '';
+  slug = '';
   tag: string = '';
   codefield = '';
   title_empty = false;
@@ -63,10 +64,11 @@ export class NewQuestionComponent implements OnInit {
     this.isCompleted = false;
   }
   newquestion() {
-    this.question = {
+      this.question = {
       id:this.questionsNumber+1,
       title: this.title,
       body: this.body,
+      slug: this.slug,
       user: this.user?.id!,
       tag: +this.tag[0],
       created: new Date(),

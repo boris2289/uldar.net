@@ -18,6 +18,7 @@ export interface Questions {
     title: string;
     body: string;
     user: number;
+    slug: string;
     tag: number;
     created: Date;
     updated: Date;
@@ -33,8 +34,5 @@ export interface Users {
     id: number,
     first_name: string,
     second_name: string,
-    username: string,
     email: string,
-    bio: string,
-    avatar: string
   }

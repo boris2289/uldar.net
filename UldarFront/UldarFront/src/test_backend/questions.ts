@@ -4,6 +4,7 @@ export interface Questions {
   id: number;
   title: string;
   body: string;
+  slug: string;
   user: number;
   tag: number;
   created: Date;

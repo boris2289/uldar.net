@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Route, Router } from '@angular/router';
-import { Questions,Messages,Tags,Users } from 'src/app/models';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Questions, Messages, Tags, Users } from 'src/app/models';
 import { JwtHelperService } from "@auth0/angular-jwt";
 
 import { QuestionsService } from 'src/app/services/questions.service';
@@ -12,125 +12,124 @@ import { ServiceService } from 'src/app/services/service.service';
   styleUrls: ['./question-detail.component.css'],
 })
 export class QuestionDetailComponent implements OnInit {
-  id=0;
+  slug: string | null = null;
+  question: Questions | undefined;
   messages: Messages[] = [];
   tags: Tags[] | undefined;
   users: Users[] | undefined;
-  user: Users = {
-    id:0,
-    first_name:"Someone",
-    second_name:"Someone",
-    username:"Someone",
-    email:"Something",
-    bio:"Something",
-    avatar:"Something"
-  }
-  question: Questions | undefined;
-  tag: Tags ={
-    id:0,
-    name:"None",
-    description:"Something"
-  }
-  logged=false;
 
+  user: Users = {
+    id: 0,
+    first_name: "Someone",
+    second_name: "Someone",
+    email: "Something",
+  };
+
+  tag: Tags = {
+    id: 0,
+    name: "None",
+    description: "Something"
+  };
+
+  logged = false;
   usernameFromToken: string | undefined;
 
-
-  body: string = ''
-  code: string = ''
-
+  body: string = '';
+  code: string = '';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private service: QuestionsService,
+    private questionsService: QuestionsService,
     private messageService: ServiceService,
     private jwtHelper: JwtHelperService
   ) {}
 
   ngOnInit(): void {
-
-    const access=localStorage.getItem('access');
-    if (access) this.logged=true;
+    const access = localStorage.getItem('access');
+    if (access) this.logged = true;
 
     this.getTokenDecoded();
 
-    const routeParams = this.route.snapshot.paramMap;
-    const questionIdFromRoute = Number(routeParams.get('questionID'));
+    const slug = this.route.snapshot.paramMap.get('slug');
 
-    this.service.getQuestion(questionIdFromRoute).subscribe(
+    if (!slug) {
+      this.router.navigateByUrl('/no-question-found');
+      return;
+    }
+
+    this.slug = slug;
+
+    // Получаем вопрос по slug
+    this.questionsService.getQuestion(this.slug).subscribe(
       (question) => {
         this.question = question;
-        this.id=question.id;
 
-        this.messageService.getMessages(questionIdFromRoute).subscribe((messages) => {
-          this.messages = messages;
-          this.messages.sort((m1, m2) => {
-            return (
-              new Date(m2.updated).getTime() -
-              new Date(m1.updated).getTime()
-            );
-          });
-        });
+        // Получаем сообщения для вопроса
+        // this.messageService.getMessages(this.slug!).subscribe((messages) => {
+        //   this.messages = messages.sort(
+        //     (m1, m2) => new Date(m2.updated).getTime() - new Date(m1.updated).getTime()
+        //   );
+        // });
+
+        // Получаем теги
+        // this.messageService.getTags().subscribe((tags) => {
+        //   this.tags = tags;
+        //   const tag = tags.find(t => t.id === this.question?.tag);
+        //   if (tag) this.tag = tag;
+        // });
+
+        // Получаем пользователей
+        // this.messageService.getUsers().subscribe((users) => {
+        //   this.users = users;
+        //   const user = users.find(u => u.id === this.question?.user);
+        //   if (user) this.user = user;
+        // });
       },
       (error) => {
-        this.router.navigateByUrl(`no-question-found`).then();
+        this.router.navigateByUrl('/no-question-found').then();
       }
     );
-    this.messageService.getTags().subscribe((tags) => {
-      this.tags = tags;
-      for (let i=0;i<tags.length;i++){
-        if (tags[i].id==this.question?.tag) this.tag=tags[i];
-      }
-    });
-    this.messageService.getUsers().subscribe((users) => {
-      this.users = users;
-      for (let i=0;i<users.length;i++){
-        if (users[i].id==this.question?.user) this.user=users[i];
-      }
-    });
   }
 
   edit() {
-    this.router.navigateByUrl(`/questions/${this.question?.id}/edit`).then();
+    this.router.navigateByUrl(`/questions/${this.slug}/update`).then();
   }
-  delete(){
-    this.service.deleteQuestion(this.id).subscribe((data)=>{console.log("deleted")});
-    this.router.navigateByUrl(`/questions`).then();
+
+  delete() {
+    if (!this.slug) return;
+    this.questionsService.deleteQuestion(this.slug).subscribe(() => {
+      console.log("deleted");
+      this.router.navigateByUrl('/questions').then();
+    });
   }
 
   getTokenDecoded() {
-    let token = localStorage.getItem('access');
+    const token = localStorage.getItem('access');
     if (token) {
-      let tokenPayload = JSON.stringify(this.jwtHelper.decodeToken(token));
-      this.usernameFromToken = JSON.parse(tokenPayload).user;
+      const payload: any = this.jwtHelper.decodeToken(token);
+      this.usernameFromToken = payload.user;
     }
   }
 
   addMessage() {
-    if (this.body.length <= 0) {
-      alert('You must enter at least body of message!')
+    if (!this.slug) return;
+    if (this.body.trim().length === 0) {
+      alert('You must enter at least the body of the message!');
       return;
     }
-    let id: number = 0;
-    let newMessage = {}
+
     this.messageService.getUser(this.usernameFromToken!).subscribe(user => {
-      if (user.username == this.usernameFromToken) {
-        id = user.id;
-      }
-      newMessage = {
+      const newMessage = {
         body: this.body,
         code_field: this.code,
-        question: this.question?.id!,
-        user_id: id
-      }
-      console.log(newMessage)
-      this.messageService.addMessage(this.question?.id!, newMessage).subscribe(message => {
-        console.log(message)
-      })
-      location.reload()
-    })
+        question_slug: this.slug,
+        user_id: user.id
+      };
 
-
+      // this.messageService.addMessage(this.slug!, newMessage).subscribe(() => {
+      //   location.reload();
+      // });
+    });
   }
 }

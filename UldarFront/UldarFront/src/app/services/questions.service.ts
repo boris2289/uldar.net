@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Questions, question_list } from '../../test_backend/questions';
+import { Questions } from '../models';
 import { Observable, of } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { JwtHelperService } from "@auth0/angular-jwt";
@@ -12,28 +12,28 @@ let helper = new JwtHelperService()
 })
 export class QuestionsService {
   //private apiURL = 'http://localhost:5000/questions';
-  private base_url='http://localhost:8000/api/questions';
+  private base_url='http://127.0.0.1:8000/api/questions';
 
   constructor(private http: HttpClient, private router: Router) {
   }
 
   getQuestions(): Observable<Questions[]> {
-    return this.http.get<Questions[]>(this.base_url);
+    return this.http.get<Questions[]>(`${this.base_url}/list`);
   }
 
-  getQuestion(id: number): Observable<Questions> {
-    return this.http.get<Questions>(`${this.base_url}/${id}/`);
+  getQuestion(slug: string): Observable<Questions> {
+    return this.http.get<Questions>(`${this.base_url}/${slug}/retrieve`);
   }
 
-  deleteQuestion(id:number): Observable<any> {
-    return this.http.delete(`${this.base_url}/${id}/`);
+  deleteQuestion(slug: string): Observable<any> {
+    return this.http.delete(`${this.base_url}/${slug}/delete`);
   }
 
   updateQuestion(question: Questions): Observable<Questions> {
-    return this.http.put<Questions>(`${this.base_url}/${question.id}/`, question);
+    return this.http.put<Questions>(`${this.base_url}/${question.slug}/update`, question);
   }
 
   addQuestion(question: Questions): Observable<Questions> {
-    return this.http.post<Questions>(`${this.base_url}/`, question);
+    return this.http.post<Questions>(`${this.base_url}/create`, question);
   }
 }

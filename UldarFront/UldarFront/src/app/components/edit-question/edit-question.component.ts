@@ -39,10 +39,10 @@ export class EditQuestionComponent implements OnInit {
 
   ngOnInit(): void {
     const routeParams = this.route.snapshot.paramMap;
-    const questionId = Number(routeParams.get('questionID'));
+    const question_slug = String(routeParams.get('slug'));
     this.getTokenDecoded();
     this.tagService.getUser(this.usernameFromToken!).subscribe(user => this.user = user);
-    this.service.getQuestion(questionId).subscribe((question) => {
+    this.service.getQuestion(question_slug).subscribe((question) => {
         this.question = question;
         this.id=question.id
         this.title=question.title;
@@ -82,6 +82,7 @@ export class EditQuestionComponent implements OnInit {
       title: this.title,
       body: this.body,
       user: this.user?.id!,
+      slug: this.title,
       tag: +this.tagFromForm[0],
       created: new Date(),
       updated: new Date(),
