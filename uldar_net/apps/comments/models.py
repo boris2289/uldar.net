@@ -28,3 +28,11 @@ class Comments(Model):
         max_length=MAX_TEXT_LENGTH
     )
 
+    created_at = DateTimeField(
+        auto_now=True
+    )
+
+    updated_at = DateTimeField(
+        auto_now_add=True
+    )
+

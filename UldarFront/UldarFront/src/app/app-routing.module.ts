@@ -16,19 +16,21 @@ import { NewQuestionComponent } from './components/new-question/new-question.com
 import { SignUpComponent } from './components/sign-up/sign-up.component';
 import { EditQuestionComponent } from './components/edit-question/edit-question.component';
 import { PasswordChangeComponent } from './components/password-change/password-change.component';
+import { ProfileComponent } from './components/profile/profile.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'questions', component: QuestionsComponent },
   { path: 'questions/:slug', component: QuestionDetailComponent },
-  { path: 'questions/:slug/edit', component: EditQuestionComponent, canActivate: [AuthGuardService], },
+  { path: 'questions/edit/:slug', component: EditQuestionComponent, canActivate: [AuthGuardService], },
   { path: 'tags', component: TagsComponent },
   { path: 'tags/:slug', component: TagDetailComponent },
   { path: 'login', component: LoginPageComponent },
   { path: 'signup', component: SignUpComponent },
-  { path: 'users/:username', component: UserPageComponent, },
+  { path: 'users/:id', component: UserPageComponent, },
   { path: 'users/:username/change_password', component: PasswordChangeComponent, canActivate: [AuthGuardService], },
   { path: 'users', component: UsersComponent },
+   {path: 'profile', component : ProfileComponent, canActivate : [AuthGuardService]},
   { path: 'about', component: AboutComponent },
   { path: 'newquestion', component: NewQuestionComponent, canActivate: [AuthGuardService], },
   { path: '', redirectTo: 'home', pathMatch: 'full' },

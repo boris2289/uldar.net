@@ -7,6 +7,9 @@ export interface Comments {
     text: string;
     author: number;
     question: number;
+    author_email : string;
+    created_at : Date;
+    update_at : Date;
 }
 export interface Questions {
     id: number;
@@ -27,8 +30,10 @@ export interface Tags {
 export interface Users {
     id: number,
     first_name: string,
-    second_name: string,
+    last_name: string,
     email: string,
+    is_active : boolean,
+    is_admin : boolean,
   }
 
 export interface TagDetailResponse {

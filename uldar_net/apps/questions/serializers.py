@@ -37,7 +37,7 @@ class QuestionDetailSerializer(QuestionBaseSerializer):
     class Meta:
         """Meta class for QuestionDetailSerializer."""
         model = Question
-        fields = ['id', 'title', 'description', 'slug', 'tag', 'author', 'created_at']
+        fields = ['id', 'title', 'description', 'slug', 'tag', 'author', 'created_at', 'is_active']
 
 class QuestionListSerializer(QuestionBaseSerializer):
     """Serializer for a list of questions."""
@@ -45,7 +45,7 @@ class QuestionListSerializer(QuestionBaseSerializer):
     class Meta:
         """Meta class for QuestionListSerializer."""
         model = Question
-        fields = ['id', 'title', 'description', 'slug', 'tag', 'author']
+        fields = ['id', 'title', 'description', 'slug', 'tag', 'author', 'is_active', 'created_at']
 
 class QuestionUpdateSerializer(QuestionBaseSerializer):
     """Seriazlier for a question update model"""
@@ -53,7 +53,7 @@ class QuestionUpdateSerializer(QuestionBaseSerializer):
     class Meta:
         """Meta class for QuestionUpdateSerializer"""
         model = Question
-        fields = ['id', 'title', 'description', 'tag']
+        fields = ['id', 'title', 'description', 'tag', 'is_active']
         
 
     def update(self, instance, validated_data):

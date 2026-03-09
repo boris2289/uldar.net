@@ -43,11 +43,11 @@ export class ServiceService {
   }
 
   getUsers(): Observable<Users[]> {
-    return this.http.get<Users[]>(`${this.base_url}/users`);
+    return this.http.get<Users[]>(`${this.base_url}users/`);
   }
 
   getUser(id : number): Observable<Users> {
-    return this.http.get<Users>(`${this.base_url}users/${id}/`);
+    return this.http.get<Users>(`${this.base_url}users/${id}`);
   }
 
   login(email: string, password: string) {
@@ -63,6 +63,10 @@ export class ServiceService {
 
   changePassword(username: string, data: any):Observable<null>{
     return this.http.put<any>(`${this.base_url}/users/${username}/change_password/`,data);
+  }
+
+  myProfile(): Observable<Users> {
+    return this.http.get<Users>(`http://localhost:8000/api/me`);
   }
 
   isExpiredToken(token: string | null): boolean {
@@ -81,4 +85,5 @@ export class ServiceService {
     }
     return true;
   }
+
 }

@@ -1,17 +1,44 @@
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, throwError } from "rxjs";
+import { catchError, switchMap } from "rxjs/operators";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable()
-export class AuthInterceptor implements HttpInterceptor{
-    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        const access=localStorage.getItem('access')
-        if (access){
-            const newReq=req.clone({
-                headers:req.headers.append('Authorization',`Bearer ${access}`)
+export class AuthInterceptor implements HttpInterceptor {
+  constructor(private http: HttpClient) {}
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    const access = localStorage.getItem('access');
+
+    const authReq = access
+      ? req.clone({ headers: req.headers.set('Authorization', `Bearer ${access}`) })
+      : req;
+
+    return next.handle(authReq).pipe(
+      catchError(err => {
+        if (err.status === 401) {
+          const refresh = localStorage.getItem('refresh');
+          if (!refresh) return throwError(() => err);
+
+          return this.http.post<any>('http://127.0.0.1:8000/api/token/refresh/', { refresh }).pipe(
+            switchMap(tokens => {
+              localStorage.setItem('access', tokens.access);
+
+              const retryReq = req.clone({
+                headers: req.headers.set('Authorization', `Bearer ${tokens.access}`)
+              });
+              return next.handle(retryReq);
+            }),
+            catchError(() => {
+              localStorage.removeItem('access');
+              localStorage.removeItem('refresh');
+              return throwError(() => err);
             })
-            return next.handle(newReq);
+          );
         }
-        return next.handle(req);
-    }
+        return throwError(() => err);
+      })
+    );
+  }
 }

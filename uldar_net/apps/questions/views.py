@@ -77,12 +77,12 @@ class QuestionViewSet(ViewSet):
         comments : List[Comments] = Comments.objects.filter(question = question) 
 
         comment_serializer : CommentListSerializer = CommentListSerializer(comments, many = True)
-        # comments : CommentListSerializer = 
+        
 
         return DRFResponse(
             {
                 "question" : serializer.data,
-                "comments" : comment_serializer.data
+                "comments" : comment_serializer.data,
             },
             status=HTTP_200_OK
         )
@@ -251,6 +251,30 @@ class QuestionViewSet(ViewSet):
             serializer.data,
             status= HTTP_200_OK
         )
+    
+    @action(
+    methods=("GET",),
+    permission_classes = (AllowAny,),
+    url_path= 'list_by_author',
+    detail=False
+    )    
+    def list_questions_by_author(
+        self,
+        request: DRFRequest,
+        *args : tuple[Any, ...],
+        **kwargs : dict[str, Any]
+    ) -> DRFResponse :
+        
+        author_id = request.query_params.get('author')
+        
+        questions = Question.objects.filter(author = author_id)
+        serializer : QuestionListSerializer = QuestionListSerializer(questions, many = True)
+
+        return DRFResponse(
+            serializer.data,
+            status = HTTP_200_OK
+        )
+    
 
 
 

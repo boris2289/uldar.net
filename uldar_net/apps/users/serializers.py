@@ -7,7 +7,7 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name') 
+        fields = ('id', 'email', 'first_name', 'last_name', 'is_active', 'is_admin') 
         read_only_fields = ('email',)
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -25,3 +25,17 @@ class ChangePasswordSerializer(serializers.Serializer):
 
     def validate_new_password(self, value):
         return value
+
+class ListUserSerializer(serializers.ModelSerializer):
+    """Serializer for list User model"""
+
+    class Meta:
+        model = User
+        fields = ['id','email', 'first_name', 'last_name']
+
+class RetrieveUserSerializer(serializers.ModelSerializer):
+    """Serializer for retrieve User model"""
+
+    class Meta:
+        model = User
+        fields = ['id','email', 'first_name', 'last_name']

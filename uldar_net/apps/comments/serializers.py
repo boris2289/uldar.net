@@ -7,7 +7,7 @@ from typing import Any
 
 
 # Rest framework imports
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, EmailField
 
 
 # Project imports
@@ -23,11 +23,12 @@ class CommentBaseSerializer(ModelSerializer):
 
 class CommentListSerializer(CommentBaseSerializer):
     """Serializer for list the Comment models"""
+    author_email = EmailField(source = "author.email")
 
     class Meta:
         """Meta class for CommentListSerializer"""
         model = Comments
-        fields = ['id', 'author', 'question', 'text']
+        fields = ['id', 'author', 'question', 'text', 'author_email']
 
 class CommentCreateSerializer(CommentBaseSerializer):
     """Serializer for creating a Comment model"""
@@ -40,4 +41,11 @@ class CommentCreateSerializer(CommentBaseSerializer):
             'text': {'required': True, 'max_length': Comments.MAX_TEXT_LENGTH},
         }
 
+class CommentUpdateSerializer(CommentBaseSerializer):
+    """Serializer for updating comment"""
+
+    class Meta:
+        """Meta class for CommentUpdateSerializer"""
+        model = Comments
+        fields = ['author', 'question', 'text']
 

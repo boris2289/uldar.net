@@ -1,9 +1,13 @@
+# Python imports
+from typing import Any
+
 from django.contrib.auth import get_user_model
-from .serializers import UserSerializer, RegisterSerializer, ChangePasswordSerializer
+from .serializers import UserSerializer, RegisterSerializer, ChangePasswordSerializer, ListUserSerializer
 from rest_framework import generics
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.request import Request as DRFRequest
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
@@ -41,5 +45,13 @@ class ChangePasswordView(generics.GenericAPIView):
         user.save()
 
         return Response({"status": "password changed"}, status=HTTP_200_OK)
+    
+class ListUserView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = ListUserSerializer
+    permission_classes = [AllowAny]
 
-
+class RetrieveUserView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = ListUserSerializer
+    permission_classes = [AllowAny]

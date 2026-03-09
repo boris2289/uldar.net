@@ -9,6 +9,6 @@ urlpatterns = [
     path("api/", view = include('apps.tags.urls')),
     path("api/", view = include('apps.questions.urls')),
     path("api/v1/users/", include("apps.users.urls")),
-
+    path("api/", view = include("apps.comments.urls")),
     path("api/", include("apps.users.urls")),
 ]
