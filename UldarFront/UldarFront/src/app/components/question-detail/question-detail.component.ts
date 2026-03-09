@@ -19,6 +19,7 @@ export class QuestionDetailComponent implements OnInit {
   tags: Tags[] = [];
   tagsForQuestion: Tags[] = [];
   user?: Users;
+  isAuthor: boolean = false;
 
   commentText: string = "";
   isAuthenticated: boolean = false;
@@ -26,6 +27,9 @@ export class QuestionDetailComponent implements OnInit {
   
   tokenPayload: any;
   usernameFromToken?: number;
+
+  editingCommentId: number | null = null;
+  editedCommentText: string = ""; 
 
   constructor(
     private route: ActivatedRoute,
@@ -37,10 +41,7 @@ export class QuestionDetailComponent implements OnInit {
   ngOnInit(): void {
     this.getUsernameFromTokenDecoded();
 
-    console.log(this.usernameFromToken)
-
     const token = localStorage.getItem("access");
-
     if (token) {
       const helper = new JwtHelperService();
       this.isAuthenticated = !helper.isTokenExpired(token);
@@ -50,22 +51,22 @@ export class QuestionDetailComponent implements OnInit {
     if (!slug) return;
 
     this.questionService.getQuestion(slug).subscribe((response: QuestionDetailResponse) => {
-
       const q = response.question;
-
       this.question = q;
       this.comments = response.comments;
-      this.tags = response.tags;
 
-      this.tagsForQuestion = this.tags.filter(tag =>
-        q.tag.includes(tag.id)
-      );
+      this.tagService.getTags().subscribe(tags => {
+        this.tags = tags;
+        this.tagsForQuestion = tags.filter(tag => q.tag.includes(tag.id));
+      });
 
       this.tagService.getUser(q.author).subscribe(user => {
         this.user = user;
-        console.log(user)
       });
 
+      if (Number(this.usernameFromToken) === q.author) {
+        this.isAuthor = true;
+      }
     });
   }
 
@@ -96,11 +97,40 @@ export class QuestionDetailComponent implements OnInit {
 
     const decoded = this.jwtHelper.decodeToken(token);
 
-    console.log("Token payload:", decoded);
 
     this.usernameFromToken = decoded.user_id;
 
-    console.log(this.usernameFromToken)
 
   }
+
+  startEditComment(comment: Comments) {
+    if (Number(this.usernameFromToken) !== Number(comment.author)) return;
+    this.editingCommentId = comment.id;
+    this.editedCommentText = comment.text;
+  }
+
+saveEditComment(comment: Comments) {
+  if (!this.editedCommentText.trim()) return;
+
+  const data = { text: this.editedCommentText };
+
+  this.questionService.editComment(comment.id, data).subscribe({
+    next: (updated) => {
+      const index = this.comments.findIndex(c => c.id === comment.id);
+      if (index !== -1) this.comments[index].text = this.editedCommentText;
+
+      this.editingCommentId = null;
+      this.editedCommentText = "";
+    },
+    error: (err) => console.error(err)
+  });
+}
+
+cancelEditComment() {
+  this.editingCommentId = null;
+  this.editedCommentText = "";
+}
+getTagName(tagId: number): string {
+  return this.tags.find(t => t.id === tagId)?.name ?? '';
+}
 }

@@ -13,26 +13,17 @@ import { JwtHelperService } from "@auth0/angular-jwt";
 export class EditQuestionComponent implements OnInit {
 
   question?: Questions;
-
-  tags: Tags[] = [];
-
   id = 0;
   title = '';
   description = '';
+  isActive: boolean = true;
+  isCompleted = false;
 
-  tag: number[] = [];
-  selectedTagId = 0;
-
-  tagName = '';
-  codefield = '';
-
-  author!: number;
+  tagInputs: string[] = [''];  // ✅ как в new-question
 
   title_empty = false;
   description_empty = false;
   tag_empty = false;
-
-  isCompleted = false;
 
   usernameFromToken?: string;
 
@@ -45,9 +36,7 @@ export class EditQuestionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-
     const slug = this.route.snapshot.paramMap.get('slug');
-
     if (!slug) {
       this.router.navigateByUrl('/questions');
       return;
@@ -55,41 +44,37 @@ export class EditQuestionComponent implements OnInit {
 
     this.getTokenDecoded();
 
-
     this.service.getQuestion(slug).subscribe((response) => {
+      const question = response.question;
+      this.question = question;
+      this.id = question.id;
+      this.title = question.title;
+      this.description = question.description;
+      this.isActive = question.is_active;
 
-    const question = response.question;
-
-    this.question = question;
-
-    this.id = question.id;
-    this.title = question.title;
-    this.description = question.description;
-    this.tag = question.tag;
-
-    this.selectedTagId = question.tag[0];
-
-
+      // ✅ загружаем существующие теги как строки
       this.tagService.getTags().subscribe((tags) => {
+        const questionTags = tags
+          .filter(t => question.tag.includes(t.id))
+          .map(t => t.name);
 
-        this.tags = tags;
-
-        const tag = tags.find(t => t.id === this.selectedTagId);
-
-        if (tag) {
-          this.tagName = tag.name;
-        }
-
+        this.tagInputs = questionTags.length > 0 ? questionTags : [''];
       });
-
     });
+  }
 
+  addTag() {
+    this.tagInputs.push('');
+  }
+
+  trackByIndex(index: number) {
+    return index;
   }
 
   check() {
-    this.title_empty = this.title === '';
-    this.description_empty = this.description === '';
-    this.tag_empty = this.selectedTagId === 0;
+    this.title_empty = this.title.trim() === '';
+    this.description_empty = this.description.trim() === '';
+    this.tag_empty = this.tagInputs.every(t => t.trim() === '');
 
     this.isCompleted =
       !this.title_empty &&
@@ -102,38 +87,43 @@ export class EditQuestionComponent implements OnInit {
   }
 
   editquestion() {
+    if (!this.question) return;
 
-    const updatedQuestion: Questions = {
+    const oldSlug = this.question.slug;
 
-      id: this.id,
-      title: this.title,
-      description: this.description,
-      slug: this.title.toLowerCase().replace(/\s+/g, '-'),
-      author: this.author,
-      tag: [this.selectedTagId],
-      created_at: new Date(),
-      updated_at: new Date(),
-      is_active: true,
+    // ✅ создаём/находим теги как в new-question
+    const tagNames = this.tagInputs
+      .map(t => t.replace('#', '').trim())
+      .filter(t => t !== '');
 
-    };
+    const tagRequests = tagNames.map(name =>
+      this.tagService.createTag(name).toPromise()
+    );
 
-    this.service.updateQuestion(updatedQuestion).subscribe(() => {
+    Promise.all(tagRequests).then(createdTags => {
+      const tagIds = createdTags
+        .filter(t => t !== undefined)
+        .map(t => t!.id);
 
-      this.router.navigateByUrl(`/questions/${updatedQuestion.slug}`);
+      const updatedQuestion: Partial<Questions> = {
+        title: this.title,
+        description: this.description,
+        tag: tagIds,
+        is_active: this.isActive
+      };
 
+      this.service.updateQuestion(oldSlug, updatedQuestion).subscribe(
+        () => this.router.navigateByUrl('/questions'),
+        (err) => console.error(err)
+      );
     });
-
   }
 
   getTokenDecoded() {
-
     const token = localStorage.getItem('access');
-
     if (token) {
       const payload = this.jwtHelper.decodeToken(token);
       this.usernameFromToken = payload.user;
     }
-
   }
-
 }

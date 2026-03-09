@@ -36,20 +36,11 @@
             Submit
         </button>
 
-        <div *ngIf="isCompleted">
-
+        <div *ngIf="isCompleted" class="confirm-block">
             <h5>Are you sure there is no such announcement?</h5>
-
-            <button type="button" (click)="newquestion()" class="btn btn-lg btn-primary">
-                Yes
-            </button>
-
-            <button type="button" (click)="recheck()" class="btn btn-lg btn-primary">
-                No
-            </button>
-
+            <button type="button" (click)="newquestion()" class="btn btn-lg btn-primary">Yes</button>
+            <button type="button" (click)="recheck()" class="btn btn-lg btn-primary">No</button>
         </div>
-
     </div>
 
 </form>

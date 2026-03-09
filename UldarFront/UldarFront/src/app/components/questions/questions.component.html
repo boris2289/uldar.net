@@ -7,15 +7,43 @@
         <h6 *ngIf="alertF" class="alert-msg">To do announcement, you must be logged in</h6>
     </div>
 
+    <div class="filter-wrapper">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab === 'active'" (click)="setTab('active')">
+                    Active
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" [class.active]="activeTab === 'archive'" (click)="setTab('archive')">
+                    Archive
+                </button>
+            </li>
+        </ul>
+    </div>
+
     <div class="question-list">
-        <div *ngFor="let question of questions" class="question-card">
+        <div *ngFor="let question of filteredQuestions" class="question-card">
             <a [routerLink]="['/questions', question.slug]" class="question-link">
                 <div class="question-content">
                     <h5>{{ question.title }}</h5>
                     <small class="date">{{ question.created_at | date: 'HH:mm, dd/MM/yyyy' }}</small>
-
                 </div>
             </a>
+
+            <!-- ✅ теги -->
+            <div class="question-tags">
+                <span *ngFor="let tagId of question.tag.slice(0, 3)" class="tag">
+                    {{ getTagName(tagId) }}
+                </span>
+                <span *ngIf="question.tag.length > 3" class="tag tag-more">
+                    +{{ question.tag.length - 3 }}
+                </span>
+            </div>
         </div>
+
+        <p *ngIf="filteredQuestions.length === 0" class="text-muted mt-3">
+            No announcements found.
+        </p>
     </div>
 </div>
