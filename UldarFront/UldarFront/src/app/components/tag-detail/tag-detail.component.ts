@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Tags,Questions } from 'src/app/models';
 
-import { Tags, tags_list } from 'src/test_backend/tags';
-import { Questions, question_list } from 'src/test_backend/questions';
 import { ServiceService } from 'src/app/services/service.service';
 import { QuestionsService } from 'src/app/services/questions.service';
 
@@ -24,17 +23,11 @@ export class TagDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const routeParams = this.route.snapshot.paramMap;
-    const tagIDFromRoute = Number(routeParams.get('tagID'));
-    const tagNameFromRoute = String(routeParams.get('tagName'));
+    const tagNameFromRoute = String(routeParams.get('slug'));
     this.service.getTag(tagNameFromRoute).subscribe(
-      (tag) => {
-        this.tag = tag;
-        this.questionService.getQuestions().subscribe(
-          (questions) =>
-            (this.questions = questions.filter((question) => {
-              return question.tag === this.tag?.id;
-            }))
-        );
+      (response) => {
+        this.tag = response.tag;
+        this.questions = response.questions        
       },
       (error) => {
         this.router.navigateByUrl(`notagfound`);

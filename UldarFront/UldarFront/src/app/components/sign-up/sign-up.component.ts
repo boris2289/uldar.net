@@ -1,100 +1,69 @@
-
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Users } from '../../../test_backend/users';
-import { ServiceService } from "../../services/service.service";
-import Validation from '../../utils/validation'
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ServiceService } from '../../services/service.service';
 
 @Component({
-  selector: 'app-sign-up',
+  selector: 'app-register',
   templateUrl: './sign-up.component.html',
   styleUrls: ['./sign-up.component.css']
 })
 export class SignUpComponent implements OnInit {
-
-  form: FormGroup = new FormGroup({
-    firstname: new FormControl(''),
-    lastname: new FormControl(''),
-    age: new FormControl(''),
-    username: new FormControl(''),
-    email: new FormControl(''),
-    password: new FormControl(''),
-    confirmPassword: new FormControl(''),
-  });
+  form!: FormGroup;  
   submitted = false;
+  error: string = '';
 
-  data: {
-    email: string;
-    username: string;
-    first_name: string;
-    last_name: string;
-    password: string;
-    password2: string;
-    age: string;
-  } | undefined
-
-  constructor(private formBuilder: FormBuilder, private service: ServiceService, private route : Router) { }
+  constructor(private fb: FormBuilder, private authService: ServiceService, private router: Router) {}
 
   ngOnInit(): void {
-    this.form = this.formBuilder.group(
-      {
-        firstname: ['', Validators.required],
-        lastname: ['', Validators.required],
-        age: ['', Validators.required],
-        username: [
-          '',
-          [
-            Validators.required,
-            Validators.minLength(6),
-            Validators.maxLength(20)
-          ]
-        ],
-        email: ['', [Validators.required, Validators.email]],
-        password: [
-          '',
-          [
-            Validators.required,
-            Validators.minLength(6),
-            Validators.maxLength(40)
-          ]
-        ],
-        confirmPassword: ['', Validators.required],
-      },
-      {
-        validators: [Validation.match('password', 'confirmPassword')]
-      }
-    );
+    this.form = this.fb.group({
+      firstname: ['', Validators.required],
+      lastname: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(40)]],
+      confirmPassword: ['', Validators.required]
+    }, {
+      validators: this.passwordsMatchValidator
+    });
   }
 
-  get f(): { [key: string]: AbstractControl } {
-    return this.form.controls;
+  // Валидатор для проверки совпадения паролей
+  passwordsMatchValidator(form: FormGroup) {
+    const password = form.get('password')?.value;
+    const confirm = form.get('confirmPassword')?.value;
+    return password === confirm ? null : { matching: true };
   }
 
-  onSubmit(): void {
+  // Удобный getter для шаблона
+  get f() { return this.form.controls; }
+
+  onSubmit() {
     this.submitted = true;
+
     if (this.form.invalid) {
       return;
     }
-    this.data = {
-      email: this.form.get('email')?.value,
-      username: this.form.get('username')?.value,
-      first_name: this.form.get('firstname')?.value,
-      last_name: this.form.get('lastname')?.value,
-      password: this.form.get('password')?.value,
-      password2: this.form.get('password')?.value,
-      age: this.form.get('age')?.value,
-    }
-    this.service.register(this.data).subscribe(user => {
-      console.log(user)})
-    console.log(this.data);
+
+    const userData = {
+      first_name: this.f['firstname'].value,
+      last_name: this.f['lastname'].value,
+      email: this.f['email'].value,
+      password: this.f['password'].value
+    };
+
+    this.authService.register(userData).subscribe({
+      next: (res) => {
+        // регистрация успешна, редирект
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.error = err.error?.detail || 'Registration failed';
+      }
+    });
   }
-  onReset(): void {
+
+  onReset() {
     this.submitted = false;
     this.form.reset();
-  }
-  
-  goToLogin() {
-    this.route.navigateByUrl('login');
   }
 }

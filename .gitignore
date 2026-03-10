@@ -1,1 +1,12 @@
-venv_name/
+# Environment
+venv/
+uldar_net/config/env/*
+uldar_net/config/.env
+uldar_net/db.sqlite3
+*db.sqlite3
+__pycache__/
+*.pyc
+.idea/
+
+
+

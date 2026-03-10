@@ -1,136 +1,136 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Route, Router } from '@angular/router';
-import { Questions,Messages,Tags,Users } from 'src/app/models';
-import { JwtHelperService } from "@auth0/angular-jwt";
-
+import { ActivatedRoute } from '@angular/router';
+import { Questions, Tags, Users, Comments, QuestionDetailResponse } from 'src/app/models';
 import { QuestionsService } from 'src/app/services/questions.service';
 import { ServiceService } from 'src/app/services/service.service';
+import { JwtHelperService } from "@auth0/angular-jwt";
+
 
 @Component({
   selector: 'app-question-detail',
   templateUrl: './question-detail.component.html',
-  styleUrls: ['./question-detail.component.css'],
+  styleUrls: ['./question-detail.component.css']
 })
+
 export class QuestionDetailComponent implements OnInit {
-  id=0;
-  messages: Messages[] = [];
-  tags: Tags[] | undefined;
-  users: Users[] | undefined;
-  user: Users = {
-    id:0,
-    first_name:"Someone",
-    second_name:"Someone",
-    username:"Someone",
-    email:"Something",
-    bio:"Something",
-    avatar:"Something"
-  }
-  question: Questions | undefined;
-  tag: Tags ={
-    id:0,
-    name:"None",
-    description:"Something"
-  }
-  logged=false;
 
-  usernameFromToken: string | undefined;
+  question?: Questions;
+  comments: Comments[] = [];
+  tags: Tags[] = [];
+  tagsForQuestion: Tags[] = [];
+  user?: Users;
+  isAuthor: boolean = false;
 
+  commentText: string = "";
+  isAuthenticated: boolean = false;
 
-  body: string = ''
-  code: string = ''
+  
+  tokenPayload: any;
+  usernameFromToken?: number;
 
+  editingCommentId: number | null = null;
+  editedCommentText: string = ""; 
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
-    private service: QuestionsService,
-    private messageService: ServiceService,
+    private questionService: QuestionsService,
+    private tagService: ServiceService,
     private jwtHelper: JwtHelperService
   ) {}
 
   ngOnInit(): void {
+    this.getUsernameFromTokenDecoded();
 
-    const access=localStorage.getItem('access');
-    if (access) this.logged=true;
-
-    this.getTokenDecoded();
-
-    const routeParams = this.route.snapshot.paramMap;
-    const questionIdFromRoute = Number(routeParams.get('questionID'));
-
-    this.service.getQuestion(questionIdFromRoute).subscribe(
-      (question) => {
-        this.question = question;
-        this.id=question.id;
-
-        this.messageService.getMessages(questionIdFromRoute).subscribe((messages) => {
-          this.messages = messages;
-          this.messages.sort((m1, m2) => {
-            return (
-              new Date(m2.updated).getTime() -
-              new Date(m1.updated).getTime()
-            );
-          });
-        });
-      },
-      (error) => {
-        this.router.navigateByUrl(`no-question-found`).then();
-      }
-    );
-    this.messageService.getTags().subscribe((tags) => {
-      this.tags = tags;
-      for (let i=0;i<tags.length;i++){
-        if (tags[i].id==this.question?.tag) this.tag=tags[i];
-      }
-    });
-    this.messageService.getUsers().subscribe((users) => {
-      this.users = users;
-      for (let i=0;i<users.length;i++){
-        if (users[i].id==this.question?.user) this.user=users[i];
-      }
-    });
-  }
-
-  edit() {
-    this.router.navigateByUrl(`/questions/${this.question?.id}/edit`).then();
-  }
-  delete(){
-    this.service.deleteQuestion(this.id).subscribe((data)=>{console.log("deleted")});
-    this.router.navigateByUrl(`/questions`).then();
-  }
-
-  getTokenDecoded() {
-    let token = localStorage.getItem('access');
+    const token = localStorage.getItem("access");
     if (token) {
-      let tokenPayload = JSON.stringify(this.jwtHelper.decodeToken(token));
-      this.usernameFromToken = JSON.parse(tokenPayload).user;
+      const helper = new JwtHelperService();
+      this.isAuthenticated = !helper.isTokenExpired(token);
     }
+
+    const slug = this.route.snapshot.paramMap.get('slug');
+    if (!slug) return;
+
+    this.questionService.getQuestion(slug).subscribe((response: QuestionDetailResponse) => {
+      const q = response.question;
+      this.question = q;
+      this.comments = response.comments;
+
+      this.tagService.getTags().subscribe(tags => {
+        this.tags = tags;
+        this.tagsForQuestion = tags.filter(tag => q.tag.includes(tag.id));
+      });
+
+      this.tagService.getUser(q.author).subscribe(user => {
+        this.user = user;
+      });
+
+      if (Number(this.usernameFromToken) === q.author) {
+        this.isAuthor = true;
+      }
+    });
   }
 
-  addMessage() {
-    if (this.body.length <= 0) {
-      alert('You must enter at least body of message!')
-      return;
-    }
-    let id: number = 0;
-    let newMessage = {}
-    this.messageService.getUser(this.usernameFromToken!).subscribe(user => {
-      if (user.username == this.usernameFromToken) {
-        id = user.id;
-      }
-      newMessage = {
-        body: this.body,
-        code_field: this.code,
-        question: this.question?.id!,
-        user_id: id
-      }
-      console.log(newMessage)
-      this.messageService.addMessage(this.question?.id!, newMessage).subscribe(message => {
-        console.log(message)
-      })
-      location.reload()
-    })
+  
+
+  postComment() {
+    if (!this.commentText.trim()) return;
+
+    const slug = this.route.snapshot.paramMap.get('slug');
+
+    const data = {
+      text: this.commentText,
+      author: Number(this.usernameFromToken),
+      question: this.question?.id
+    };
+
+    this.tagService.addComment(slug!, data).subscribe(res => {
+      this.comments.push(res);
+      this.commentText = "";
+    });
+  }
+
+  getUsernameFromTokenDecoded() {
+
+    const token = localStorage.getItem('access');
+
+    if (!token) return;
+
+    const decoded = this.jwtHelper.decodeToken(token);
+
+
+    this.usernameFromToken = decoded.user_id;
 
 
   }
+
+  startEditComment(comment: Comments) {
+    if (Number(this.usernameFromToken) !== Number(comment.author)) return;
+    this.editingCommentId = comment.id;
+    this.editedCommentText = comment.text;
+  }
+
+saveEditComment(comment: Comments) {
+  if (!this.editedCommentText.trim()) return;
+
+  const data = { text: this.editedCommentText };
+
+  this.questionService.editComment(comment.id, data).subscribe({
+    next: (updated) => {
+      const index = this.comments.findIndex(c => c.id === comment.id);
+      if (index !== -1) this.comments[index].text = this.editedCommentText;
+
+      this.editingCommentId = null;
+      this.editedCommentText = "";
+    },
+    error: (err) => console.error(err)
+  });
+}
+
+cancelEditComment() {
+  this.editingCommentId = null;
+  this.editedCommentText = "";
+}
+getTagName(tagId: number): string {
+  return this.tags.find(t => t.id === tagId)?.name ?? '';
+}
 }

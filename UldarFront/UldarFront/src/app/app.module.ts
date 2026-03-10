@@ -24,6 +24,7 @@ import { NewQuestionComponent } from './components/new-question/new-question.com
 import { SignUpComponent } from './components/sign-up/sign-up.component';
 import { EditQuestionComponent } from './components/edit-question/edit-question.component';
 import { PasswordChangeComponent } from './components/password-change/password-change.component';
+import { ProfileComponent } from './components/profile/profile.component';
 
 @NgModule({
   declarations: [
@@ -44,6 +45,7 @@ import { PasswordChangeComponent } from './components/password-change/password-c
     SignUpComponent,
     EditQuestionComponent,
     PasswordChangeComponent,
+    ProfileComponent,
   ],
   imports: [BrowserModule, AppRoutingModule, FormsModule, HttpClientModule, ReactiveFormsModule],
   providers: [

@@ -2,39 +2,47 @@ export interface AuthToken{
     refresh:string;
     access:string;
 }
-export interface Messages {
+export interface Comments {
     id: number;
-    body: string;
-    user: number;
-    score: number;
+    text: string;
+    author: number;
     question: number;
-    created: Date;
-    updated: Date;
-    is_best_answer: boolean;
-    code_field: string;
+    author_email : string;
+    created_at : Date;
+    update_at : Date;
 }
 export interface Questions {
     id: number;
     title: string;
-    body: string;
-    user: number;
-    tag: number;
-    created: Date;
-    updated: Date;
+    description: string;
+    author: number;
+    slug: string;
+    tag: number[];
+    created_at: Date;
+    updated_at: Date;
     is_active: boolean;
-    code_field: string;
 }
 export interface Tags {
     id: number;
     name: string;
-    description: string;
+    slug: string;
 }
 export interface Users {
     id: number,
     first_name: string,
-    second_name: string,
-    username: string,
+    last_name: string,
     email: string,
-    bio: string,
-    avatar: string
+    is_active : boolean,
+    is_admin : boolean,
   }
+
+export interface TagDetailResponse {
+  tag: Tags;
+  questions: Questions[];
+}
+
+export interface QuestionDetailResponse {
+    question : Questions,
+    comments : Comments[],
+    tags : Tags[]
+}

@@ -1,48 +1,43 @@
 <form>
     <h2>Edit Question</h2>
     <div class="main_block">
-      <div class="block">
-        <h4>Title</h4>
-        <h6>Be specific and imagine you're asking a question to another person</h6>
-        <input [(ngModel)]="title" [ngModelOptions]="{ standalone: true }" type="text" placeholder="e.g. Is there a Python function to find the certain symbol of string?"
-               id="title" value="{{title}}"/>
-        <p *ngIf="title_empty">Write a question!</p>
-      </div>
-      <div class="block">
-        <h4>Body</h4>
-        <h6>Include all the information about your question</h6>
-        <textarea cols="30" rows="10" id="body" [(ngModel)]="body" [ngModelOptions]="{ standalone: true }"
-                  placeholder="I have a problem with realization!" value="{{body}}"></textarea>
-        <p *ngIf="body_empty">Explain the question!</p>
-      </div>
-      <div class="block">
-        <h4>Location</h4>
-        <h6>Location and Number</h6>
-        <textarea cols="30" rows="10" id="codefield" [(ngModel)]="codefield" [ngModelOptions]="{ standalone: true }"
-                  placeholder="print(sum(array))?" value="{{codefield}}"></textarea>
-      </div>
-      <div class="block">
-        <div class="sub_block">
-          <h4>Tag</h4>
-          <h6>Choose a tag of your question</h6>
-          <select [(ngModel)]="tagFromForm" [ngModelOptions]="{ standalone: true }">
-            <option>{{this.tag}}: {{ this.tagName }}</option>
-            <option *ngFor="let t of tags">{{ t.id }}: {{ t.name }}</option>
-          </select>
-          <p *ngIf="tag_empty">Choose the tag!</p>
+        <div class="block">
+            <h4>Title</h4>
+            <h6>Be specific and imagine you're asking a question to another person</h6>
+            <input [(ngModel)]="title" [ngModelOptions]="{ standalone: true }" type="text" placeholder="e.g. Go play football" />
+            <p *ngIf="title_empty">Write a title!</p>
         </div>
-      </div>
-      <button type="submit" (click)="check()" class="btn btn-lg btn-primary" id="submit">
-         Submit
-      </button>
-      <div *ngIf="isCompleted">
-        <h5>Are you sure there is no such Announcement on our site?</h5>
-        <button type="submit" (click)="editquestion()" class="btn btn-lg btn-primary subm_part">
-          Yes
-        </button>
-        <button type="submit" (click)="recheck()" class="subm_part btn btn-lg btn-primary">
-          No, need to change my Announcement
-        </button>
-      </div>
+
+        <div class="block">
+            <h4>Body</h4>
+            <h6>Include all the information about your announcement</h6>
+            <textarea rows="8" [(ngModel)]="description" [ngModelOptions]="{ standalone: true }" placeholder="We will play football!"></textarea>
+            <p *ngIf="description_empty">Explain the announcement!</p>
+        </div>
+
+        <div class="block">
+            <h4>Tags</h4>
+            <h6>Write tags like hashtags</h6>
+            <div *ngFor="let t of tagInputs; let i = index; trackBy: trackByIndex">
+                <input [(ngModel)]="tagInputs[i]" [ngModelOptions]="{ standalone: true }" placeholder="#football" />
+            </div>
+            <button type="button" (click)="addTag()">➕ Add tag</button>
+            <p *ngIf="tag_empty">Choose at least one tag!</p>
+        </div>
+
+        <div class="block">
+            <h4>Active</h4>
+            <h6>Check if this announcement should be active</h6>
+            <input type="checkbox" [(ngModel)]="isActive" [ngModelOptions]="{ standalone: true }" id="is_active" />
+            <label for="is_active">{{ isActive ? 'Active' : 'Inactive' }}</label>
+        </div>
+
+        <button type="button" (click)="check()" class="btn btn-lg btn-primary">Submit</button>
+
+        <div *ngIf="isCompleted" class="confirm-block">
+            <h5>Are you sure you want to save these changes?</h5>
+            <button type="button" (click)="editquestion()" class="btn btn-lg btn-primary">Yes</button>
+            <button type="button" (click)="recheck()" class="btn btn-lg btn-primary">No</button>
+        </div>
     </div>
-  </form>
+</form>

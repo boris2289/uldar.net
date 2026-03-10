@@ -1,31 +1,33 @@
 import { Component, OnInit } from '@angular/core';
-import {Router} from "@angular/router";
+import { Router, NavigationEnd } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
   title = 'Uldar';
-  logged=false;
+  logged = false;
 
-  constructor(private router: Router){
-  }
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
-    const access=localStorage.getItem('access');
-    if (access) this.logged=true;
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.logged = !!localStorage.getItem('access');
+      }
+    });
   }
 
   goToPage(page: string) {
-    this.router.navigate([`${page}`]).then()
+    this.router.navigate([`${page}`]);
   }
 
-  logout(){
-    this.logged=false;
+  logout() {
     localStorage.removeItem('access');
-    this.router.navigateByUrl('questions').then()
-    // location.reload();
+    localStorage.removeItem('refresh');
+    this.logged = false;
+    this.router.navigateByUrl('questions');
   }
 }

@@ -1,12 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { QuestionsService } from 'src/app/services/questions.service';
-import { Questions } from 'src/test_backend/questions';
 import { ServiceService } from 'src/app/services/service.service';
-import { Tags } from 'src/test_backend/tags';
-import { Users } from 'src/test_backend/users';
-import { Router } from "@angular/router";
-
+import { Users, Questions, Tags } from 'src/app/models';
 import { JwtHelperService } from "@auth0/angular-jwt";
 
 @Component({
@@ -16,89 +12,118 @@ import { JwtHelperService } from "@auth0/angular-jwt";
 })
 export class EditQuestionComponent implements OnInit {
 
-  question: Questions | undefined;
-  tags: Tags[] = [];
+  question?: Questions;
   id = 0;
   title = '';
-  body = '';
-  tag: number = -1;
-  tagName: string = ''
-  tagFromForm: string = ''
-  codefield = '';
-  user: Users | undefined;
-  user_empty = false;
-  title_empty = false;
-  body_empty = false;
-  tag_empty = false;
+  description = '';
+  isActive: boolean = true;
   isCompleted = false;
 
-  usernameFromToken: string | undefined;
+  tagInputs: string[] = [''];  // ✅ как в new-question
 
-  constructor(private route: ActivatedRoute,private service: QuestionsService,private tagService: ServiceService,
-              private router: Router, private jwtHelper: JwtHelperService) { }
+  title_empty = false;
+  description_empty = false;
+  tag_empty = false;
+
+  usernameFromToken?: string;
+
+  constructor(
+    private route: ActivatedRoute,
+    private service: QuestionsService,
+    private tagService: ServiceService,
+    private router: Router,
+    private jwtHelper: JwtHelperService
+  ) {}
 
   ngOnInit(): void {
-    const routeParams = this.route.snapshot.paramMap;
-    const questionId = Number(routeParams.get('questionID'));
-    this.getTokenDecoded();
-    this.tagService.getUser(this.usernameFromToken!).subscribe(user => this.user = user);
-    this.service.getQuestion(questionId).subscribe((question) => {
-        this.question = question;
-        this.id=question.id
-        this.title=question.title;
-        this.body=question.body;
-        this.tag=question.tag;
-        this.codefield=question.code_field;
-      })
+    const slug = this.route.snapshot.paramMap.get('slug');
+    if (!slug) {
+      this.router.navigateByUrl('/questions');
+      return;
+    }
 
-    this.tagService.getTags().subscribe((tags) => {
-      this.tags = tags;
-      for (let i=0;i<this.tags.length;i++){
-        if (this.tags[i].id==this.tag) {
-          this.tagName = this.tags[i].name
-          this.tags.splice(i, 1)
-        }
-      }
+    this.getTokenDecoded();
+
+    this.service.getQuestion(slug).subscribe((response) => {
+      const question = response.question;
+      this.question = question;
+      this.id = question.id;
+      this.title = question.title;
+      this.description = question.description;
+      this.isActive = question.is_active;
+
+      // ✅ загружаем существующие теги как строки
+      this.tagService.getTags().subscribe((tags) => {
+        const questionTags = tags
+          .filter(t => question.tag.includes(t.id))
+          .map(t => t.name);
+
+        this.tagInputs = questionTags.length > 0 ? questionTags : [''];
+      });
     });
   }
 
-  check() {
-    this.title_empty = this.title == '';
-    this.body_empty = this.body == '';
-    this.tag_empty = this.tag === -1;
-    if (
-      !this.title_empty &&
-      !this.body_empty &&
-      !this.tag_empty
-    )
-      this.isCompleted = true;
+  addTag() {
+    this.tagInputs.push('');
   }
+
+  trackByIndex(index: number) {
+    return index;
+  }
+
+  check() {
+    this.title_empty = this.title.trim() === '';
+    this.description_empty = this.description.trim() === '';
+    this.tag_empty = this.tagInputs.every(t => t.trim() === '');
+
+    this.isCompleted =
+      !this.title_empty &&
+      !this.description_empty &&
+      !this.tag_empty;
+  }
+
   recheck() {
     this.isCompleted = false;
   }
-  editquestion() {
-    this.question = {
-      id: this.id,
-      title: this.title,
-      body: this.body,
-      user: this.user?.id!,
-      tag: +this.tagFromForm[0],
-      created: new Date(),
-      updated: new Date(),
-      is_active: true,
-      code_field: this.codefield,
-    };
 
-    this.service.updateQuestion(this.question).subscribe((question) => {console.log(this.question);});
-    this.router.navigateByUrl(`/questions/${this.question?.id}`)
+  editquestion() {
+    if (!this.question) return;
+
+    const oldSlug = this.question.slug;
+
+    // ✅ создаём/находим теги как в new-question
+    const tagNames = this.tagInputs
+      .map(t => t.replace('#', '').trim())
+      .filter(t => t !== '');
+
+    const tagRequests = tagNames.map(name =>
+      this.tagService.createTag(name).toPromise()
+    );
+
+    Promise.all(tagRequests).then(createdTags => {
+      const tagIds = createdTags
+        .filter(t => t !== undefined)
+        .map(t => t!.id);
+
+      const updatedQuestion: Partial<Questions> = {
+        title: this.title,
+        description: this.description,
+        tag: tagIds,
+        is_active: this.isActive
+      };
+
+      this.service.updateQuestion(oldSlug, updatedQuestion).subscribe(
+        () => this.router.navigateByUrl('/questions'),
+        (err) => console.error(err)
+      );
+    });
   }
 
   getTokenDecoded() {
-    let token = localStorage.getItem('access');
+    const token = localStorage.getItem('access');
     if (token) {
-      let tokenPayload = JSON.stringify(this.jwtHelper.decodeToken(token));
-      this.usernameFromToken = JSON.parse(tokenPayload).user;
+      const payload = this.jwtHelper.decodeToken(token);
+      this.usernameFromToken = payload.user;
     }
   }
-
 }
