@@ -1,0 +1,15 @@
+# Angular
+UldarFront/UldarFront/node_modules/
+UldarFront/UldarFront/.angular/
+UldarFront/UldarFront/dist/
+
+# Django / Python
+uldar_net/venv2/
+venv/
+*.pyc
+__pycache__/
+db.sqlite3
+
+# OS files
+.DS_Store
+Thumbs.db
