@@ -1,63 +1,43 @@
-# Python imports
-from typing import Any, Dict, List, Optional, Tuple, Union
+from rest_framework import serializers
 
-# Django imports
-
-# Rest Framework imports
-from rest_framework.serializers import ModelSerializer
-
-# Project imports
 from apps.questions.models import Question
-from apps.tags.models import Tag
 from apps.questions.utils import generate_unique_slug
 
-class QuestionBaseSerializer(ModelSerializer):
-    """Base Serializer for Question model."""
 
+class QuestionBaseSerializer(serializers.ModelSerializer):
     class Meta:
-        """Meta class for QuestionBaseSerializer."""
         model = Question
-        fields = '__all__'
+        fields = "__all__"
+
 
 class QuestionCreateSerializer(QuestionBaseSerializer):
-    """Serializer for creating a question."""
-
     class Meta:
-        """Meta class for QuestionCreateSerializer."""
         model = Question
-        fields = ['id', 'title', 'description', 'tag', 'author']
+        fields = ["id", "title", "description", "tag"]
         extra_kwargs = {
-            'description': {'required': False},
-            'tag': {'required': False},
+            "description": {"required": False},
+            "tag": {"required": False},
         }
 
-class QuestionDetailSerializer(QuestionBaseSerializer):
-    """Serializer for retrieving a question."""
 
+class QuestionDetailSerializer(QuestionBaseSerializer):
     class Meta:
-        """Meta class for QuestionDetailSerializer."""
         model = Question
-        fields = ['id', 'title', 'description', 'slug', 'tag', 'author', 'created_at', 'is_active']
+        fields = ["id", "title", "description", "slug", "tag", "author", "created_at", "is_active"]
+
 
 class QuestionListSerializer(QuestionBaseSerializer):
-    """Serializer for a list of questions."""
-
     class Meta:
-        """Meta class for QuestionListSerializer."""
         model = Question
-        fields = ['id', 'title', 'description', 'slug', 'tag', 'author', 'is_active', 'created_at']
+        fields = ["id", "title", "description", "slug", "tag", "author", "is_active", "created_at"]
+
 
 class QuestionUpdateSerializer(QuestionBaseSerializer):
-    """Seriazlier for a question update model"""
-
     class Meta:
-        """Meta class for QuestionUpdateSerializer"""
         model = Question
-        fields = ['id', 'title', 'description', 'tag', 'is_active']
-        
+        fields = ["id", "title", "description", "tag", "is_active"]
 
     def update(self, instance, validated_data):
-        if 'title' in validated_data:
-            instance.slug = generate_unique_slug(validated_data['title'])
-
+        if "title" in validated_data:
+            instance.slug = generate_unique_slug(validated_data["title"])
         return super().update(instance, validated_data)

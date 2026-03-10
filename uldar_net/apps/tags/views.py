@@ -1,133 +1,85 @@
-# Python imports
-from typing import Any, Dict, List, Optional, Tuple, Union
-
-
-# Django imports
-from django.shortcuts import render
 from django.utils.text import slugify
-
-
-# Rest Framework imports
-from rest_framework.viewsets import ViewSet
-from rest_framework.response import Response as DRFResponse
-from rest_framework.request import Request as DRFRequest
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly, AllowAny
+from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
+from rest_framework import serializers
 from rest_framework.decorators import action
-from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.request import Request as DRFRequest
+from rest_framework.response import Response as DRFResponse
+from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
+from rest_framework.viewsets import ViewSet
 
-
-# Project imports
-from apps.tags.models import Tag
-from apps.tags.serializers import TagCreateSerializer, TagDetailSerializer, TagListSerializer
 from apps.questions.models import Question
 from apps.questions.serializers import QuestionListSerializer
+from apps.tags.models import Tag
+from apps.tags.serializers import TagCreateSerializer, TagDetailSerializer, TagListSerializer
 
+
+tag_retrieve_response = inline_serializer(
+    name="TagRetrieveResponse",
+    fields={
+        "tag": TagDetailSerializer(),
+        "questions": QuestionListSerializer(many=True),
+    },
+)
+
+error_response = inline_serializer(
+    name="TagErrorResponse",
+    fields={"detail": serializers.CharField()},
+)
+
+
+@extend_schema_view(
+    list_tags=extend_schema(
+        tags=["Tags"],
+        summary="List all tags",
+        responses={200: TagListSerializer(many=True)},
+    ),
+    create_tag=extend_schema(
+        tags=["Tags"],
+        summary="Create a tag",
+        request=TagCreateSerializer,
+        responses={201: TagDetailSerializer},
+    ),
+    retrieve_tag=extend_schema(
+        tags=["Tags"],
+        summary="Retrieve tag by slug",
+        responses={200: tag_retrieve_response, 404: error_response},
+    ),
+)
 class TagViewSet(ViewSet):
-    lookup_field = 'slug'
+    queryset = Tag.objects.all()
+    lookup_field = "slug"
 
-    @action(
-    methods=("GET",),
-    permission_classes = [IsAuthenticatedOrReadOnly,],
-    detail=False,
-    url_path='list'
-    )
-    def list_tags(
-        self,
-        request: DRFRequest,
-        *args: tuple[Any, ...],
-        **kwargs: dict[str, Any]
-    ) -> DRFResponse:
-        """List all tags."""
-        
+    @action(methods=["GET"], permission_classes=[IsAuthenticatedOrReadOnly], detail=False, url_path="list")
+    def list_tags(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         tags = Tag.objects.all()
         serializer = TagListSerializer(tags, many=True)
+        return DRFResponse(serializer.data, status=HTTP_200_OK)
 
-        return DRFResponse(
-            serializer.data,
-            status=HTTP_200_OK
-        )    
-
-    @action(
-    methods=("POST",),
-    permission_classes = (IsAuthenticated,),
-    detail=False,
-    url_path='create'
-    )
-    def create_tag(
-        self,
-        request: DRFRequest,
-        *args: tuple[Any, ...],
-        **kwargs: dict[str, Any]
-    ) -> DRFResponse:
-        """Create a new tag."""
-        
-
-
+    @action(methods=["POST"], permission_classes=[IsAuthenticated], detail=False, url_path="create")
+    def create_tag(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         serializer = TagCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         data = serializer.validated_data
 
-        
-        existing_tag = Tag.objects.filter(name = data['name']).first()
-        
-        if existing_tag:
-            return DRFResponse(
-            TagDetailSerializer(existing_tag).data,
-            status=HTTP_201_CREATED
-        ) 
-        else:
+        tag = Tag.objects.filter(name=data["name"]).first()
+        if tag is None:
+            tag = Tag.objects.create(name=data["name"], slug=slugify(data["name"]))
 
-            tag = Tag.objects.create(
-                name = data['name'],
-                slug = slugify(data['name'])
-            )
+        return DRFResponse(TagDetailSerializer(tag).data, status=HTTP_201_CREATED)
 
-            return DRFResponse(
-                TagDetailSerializer(tag).data,
-                status=HTTP_201_CREATED
-            )
-    
-    @action(
-    methods=("GET",),
-    permission_classes = (AllowAny,),
-    detail=True,
-    url_path='retrieve'
-    )
-    def retrieve_tag(
-        self,
-        request: DRFRequest,
-        slug : str = None,
-        *args: tuple[Any, ...],
-        **kwargs: dict[str, Any]
-    ) -> DRFResponse:
-        """Retrieve a tag."""
-
-
-
+    @action(methods=["GET"], permission_classes=[AllowAny], detail=True, url_path="retrieve")
+    def retrieve_tag(self, request: DRFRequest, slug: str = None, *args, **kwargs) -> DRFResponse:
         try:
-            tag = Tag.objects.get(slug = slug)
+            tag = Tag.objects.get(slug=slug)
         except Tag.DoesNotExist:
-            return DRFResponse(
-                {"detail" : "Tag does not exist"},
-                status=HTTP_400_BAD_REQUEST
-            )
-        
-        serializer : TagDetailSerializer = TagDetailSerializer(tag)
+            return DRFResponse({"detail": "Tag does not exist"}, status=HTTP_404_NOT_FOUND)
 
-        questions : List[Question] = Question.objects.filter(tag = tag)
-        questions_serializer = QuestionListSerializer(questions, many = True)
-
-
-
-
+        questions = Question.objects.filter(tag=tag)
         return DRFResponse(
             {
-            "tag" : serializer.data,
-            "questions" : questions_serializer.data
+                "tag": TagDetailSerializer(tag).data,
+                "questions": QuestionListSerializer(questions, many=True).data,
             },
-            status=HTTP_200_OK
+            status=HTTP_200_OK,
         )
-    
-
-    

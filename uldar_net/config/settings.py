@@ -1,22 +1,14 @@
-# Python imports
 from pathlib import Path
 
-# Project imports
 from config.conf import *
 
 
-
-# ----------------------------------------------
-# Path
-#
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 
-# ----------------------------------------------
-# Apps
-#
+
 IMPORTED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -25,7 +17,8 @@ IMPORTED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    'rest_framework',
+    "rest_framework",
+    "drf_spectacular",
 ]
 
 PROJECT_APPS = [
@@ -37,14 +30,12 @@ PROJECT_APPS = [
 
 INSTALLED_APPS = PROJECT_APPS + IMPORTED_APPS
 
-# ----------------------------------------------
-# Middleware | Templates | Validators
-#
+
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    'django.middleware.common.CommonMiddleware',
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -75,7 +66,6 @@ DATABASES = {
     }
 }
 
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -91,18 +81,33 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# ----------------------------------------------
-# Internationalization
-#
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# ----------------------------------------------
-# Static | Media
-#
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+REST_FRAMEWORK = {
+    **REST_FRAMEWORK,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
 
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Uldar Blog API",
+    "DESCRIPTION": "API documentation for users, tags, questions, and comments.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SCHEMA_PATH_PREFIX": r"/api",
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SORT_OPERATIONS": False,
+    "TAGS": [
+        {"name": "Auth", "description": "Authentication and token endpoints."},
+        {"name": "Users", "description": "User management endpoints."},
+        {"name": "Tags", "description": "Tag endpoints."},
+        {"name": "Questions", "description": "Question endpoints."},
+        {"name": "Comments", "description": "Comment endpoints."},
+        {"name": "Docs", "description": "OpenAPI schema and UI endpoints."},
+    ],
+}
