@@ -36,14 +36,14 @@ export class ServiceService {
       name: name
     });
   }
-  
+
 
   addComment(slug : string, data: any): Observable<Comments> {
     return this.http.post<Comments>(`${this.base_url}questions/${slug}/create_comment`, data)
   }
 
   getUsers(): Observable<Users[]> {
-    return this.http.get<Users[]>(`${this.base_url}users/`);
+    return this.http.get<Users[]>(`${this.base_url}v1/users/users`);
   }
 
   getUser(id : number): Observable<Users> {
@@ -62,14 +62,14 @@ export class ServiceService {
   }
 
   changePassword(data: any):Observable<null>{
-    const token = localStorage.getItem('access'); 
+    const token = localStorage.getItem('access');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
     return this.http.post<any>(`${this.base_url}me/change_password/`,data, { headers });
   }
 
   myProfile(): Observable<Users> {
-    return this.http.get<Users>(`http://localhost:8000/api/me`);
+    return this.http.get<Users>(`http://localhost:8000/api/v1/users/me/`);
   }
 
   isExpiredToken(token: string | null): boolean {
