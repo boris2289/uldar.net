@@ -61,8 +61,11 @@ export class ServiceService {
     return this.http.post<Users>(`${this.base_url}register/`, data)
   }
 
-  changePassword(username: string, data: any):Observable<null>{
-    return this.http.put<any>(`${this.base_url}/users/${username}/change_password/`,data);
+  changePassword(data: any):Observable<null>{
+    const token = localStorage.getItem('access'); 
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.post<any>(`${this.base_url}me/change_password/`,data, { headers });
   }
 
   myProfile(): Observable<Users> {
