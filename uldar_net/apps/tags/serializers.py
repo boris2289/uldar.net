@@ -9,6 +9,7 @@ from rest_framework.serializers import ModelSerializer, CharField, IntegerField
 # Project imports
 from apps.tags.models import Tag
 
+
 class TagBaseSerializer(ModelSerializer):
     """Base Serializer for Tag model."""
 
@@ -35,6 +36,7 @@ class TagDetailSerializer(TagBaseSerializer):
         model = Tag
         fields = ['id', 'name', 'slug']
 
+
 class TagListSerializer(TagBaseSerializer):
     """Serializer for a list of tags."""
 
@@ -42,4 +44,3 @@ class TagListSerializer(TagBaseSerializer):
         """Meta class for TagListSerializer."""
         model = Tag
         fields = ['id', 'name', 'slug']
-

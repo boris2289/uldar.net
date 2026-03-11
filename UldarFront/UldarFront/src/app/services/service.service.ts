@@ -51,7 +51,7 @@ export class ServiceService {
   }
 
   login(email: string, password: string) {
-    return this.http.post<any>(`${this.base_url}login/`, {
+    return this.http.post<any>(`${this.base_url}v1/users/login/`, {
       email: email,
       password: password
     });
