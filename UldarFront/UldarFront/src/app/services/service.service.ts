@@ -58,7 +58,7 @@ export class ServiceService {
   }
 
   register(data: any): Observable<Users> {
-    return this.http.post<Users>(`${this.base_url}register/`, data)
+    return this.http.post<Users>(`${this.base_url}v1/users/register/`, data)
   }
 
   changePassword(data: any):Observable<null>{
