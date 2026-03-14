@@ -1,4 +1,11 @@
-from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view, inline_serializer
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    extend_schema_view,
+    inline_serializer,
+)
 from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -24,28 +31,201 @@ error_response = inline_serializer(
     fields={"detail": serializers.CharField()},
 )
 
+validation_error_response = inline_serializer(
+    name="CommentValidationErrorResponse",
+    fields={
+        "text": serializers.ListField(child=serializers.CharField(), required=False),
+        "question": serializers.ListField(child=serializers.CharField(), required=False),
+        "detail": serializers.CharField(required=False),
+    },
+)
+
 
 @extend_schema_view(
     list=extend_schema(
         tags=["Comments"],
         summary="List all comments",
-        responses={200: CommentListSerializer(many=True)},
+        description=(
+            "Returns a list of all comments. Authentication is not required."
+        ),
+        responses={
+            200: OpenApiResponse(
+                response=CommentListSerializer(many=True),
+                description="Comments were returned successfully.",
+            ),
+            400: OpenApiResponse(
+                response=validation_error_response,
+                description="Bad request.",
+            ),
+            401: OpenApiResponse(
+                response=error_response,
+                description="Unauthorized.",
+            ),
+            403: OpenApiResponse(
+                response=error_response,
+                description="Forbidden.",
+            ),
+            404: OpenApiResponse(
+                response=error_response,
+                description="Not found.",
+            ),
+            429: OpenApiResponse(
+                response=error_response,
+                description="Too many requests.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "List comments response example",
+                response_only=True,
+                status_codes=["200"],
+                value=[
+                    {
+                        "id": 1,
+                        "text": "You should use serializers for validation.",
+                    },
+                    {
+                        "id": 2,
+                        "text": "JWT is useful for stateless authentication.",
+                    },
+                ],
+            ),
+        ],
     ),
     create_comment=extend_schema(
         tags=["Comments"],
-        summary="Create a comment",
+        summary="Create a new comment",
+        description=(
+            "Creates a new comment. Authentication is required. "
+            "The request body must contain the fields required by the comment creation serializer."
+        ),
         request=CommentCreateSerializer,
-        responses={201: CommentListSerializer},
+        responses={
+            201: OpenApiResponse(
+                response=CommentListSerializer,
+                description="Comment was created successfully.",
+            ),
+            400: OpenApiResponse(
+                response=validation_error_response,
+                description="Validation error.",
+            ),
+            401: OpenApiResponse(
+                response=error_response,
+                description="Authentication credentials were not provided or are invalid.",
+            ),
+            403: OpenApiResponse(
+                response=error_response,
+                description="Forbidden.",
+            ),
+            404: OpenApiResponse(
+                response=error_response,
+                description="Related resource was not found.",
+            ),
+            429: OpenApiResponse(
+                response=error_response,
+                description="Too many requests.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Create comment request example",
+                request_only=True,
+                value={
+                    "text": "I think serializers are needed for validation and representation.",
+                    "question": 1,
+                },
+            ),
+            OpenApiExample(
+                "Create comment response example",
+                response_only=True,
+                status_codes=["201"],
+                value={
+                    "id": 1,
+                    "text": "I think serializers are needed for validation and representation.",
+                },
+            ),
+        ],
     ),
     update_comment=extend_schema(
         tags=["Comments"],
         summary="Update comment by id",
+        description=(
+            "Partially updates an existing comment by its id. Authentication is required. "
+            "Only the author of the comment can update it. "
+            "The request body may contain one or more editable fields."
+        ),
         request=CommentUpdateSerializer,
-        responses={200: comment_update_response, 403: error_response, 404: error_response},
+        responses={
+            200: OpenApiResponse(
+                response=comment_update_response,
+                description="Comment was updated successfully.",
+            ),
+            400: OpenApiResponse(
+                response=validation_error_response,
+                description="Validation error.",
+            ),
+            401: OpenApiResponse(
+                response=error_response,
+                description="Authentication credentials were not provided or are invalid.",
+            ),
+            403: OpenApiResponse(
+                response=error_response,
+                description="User is not allowed to update this comment.",
+            ),
+            404: OpenApiResponse(
+                response=error_response,
+                description="Comment was not found.",
+            ),
+            429: OpenApiResponse(
+                response=error_response,
+                description="Too many requests.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Update comment request example",
+                request_only=True,
+                value={
+                    "text": "Updated comment text"
+                },
+            ),
+            OpenApiExample(
+                "Update comment response example",
+                response_only=True,
+                status_codes=["200"],
+                value={
+                    "details": "The comment successfully updated",
+                    "data": {
+                        "id": 1,
+                        "text": "Updated comment text",
+                    },
+                },
+            ),
+            OpenApiExample(
+                "Update comment forbidden example",
+                response_only=True,
+                status_codes=["403"],
+                value={
+                    "detail": "You can edit only your comment"
+                },
+            ),
+            OpenApiExample(
+                "Update comment not found example",
+                response_only=True,
+                status_codes=["404"],
+                value={
+                    "detail": "The comment does not exist"
+                },
+            ),
+        ],
     ),
     list_comments_by_author=extend_schema(
         tags=["Comments"],
         summary="List comments by author",
+        description=(
+            "Returns a list of comments created by a specific author. Authentication is not required. "
+            "The author must be passed as a required query parameter."
+        ),
         parameters=[
             OpenApiParameter(
                 name="author",
@@ -55,7 +235,53 @@ error_response = inline_serializer(
                 description="Author user ID",
             )
         ],
-        responses={200: CommentListSerializer(many=True), 400: error_response},
+        responses={
+            200: OpenApiResponse(
+                response=CommentListSerializer(many=True),
+                description="Comments by author were returned successfully.",
+            ),
+            400: OpenApiResponse(
+                response=error_response,
+                description="The required query parameter is missing or invalid.",
+            ),
+            401: OpenApiResponse(
+                response=error_response,
+                description="Unauthorized.",
+            ),
+            403: OpenApiResponse(
+                response=error_response,
+                description="Forbidden.",
+            ),
+            404: OpenApiResponse(
+                response=error_response,
+                description="Not found.",
+            ),
+            429: OpenApiResponse(
+                response=error_response,
+                description="Too many requests.",
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "List comments by author response example",
+                response_only=True,
+                status_codes=["200"],
+                value=[
+                    {
+                        "id": 3,
+                        "text": "This is my comment.",
+                    }
+                ],
+            ),
+            OpenApiExample(
+                "Author query param missing example",
+                response_only=True,
+                status_codes=["400"],
+                value={
+                    "detail": "author is required"
+                },
+            ),
+        ],
     ),
 )
 class CommentViewSet(ViewSet):
