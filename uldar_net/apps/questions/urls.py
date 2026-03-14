@@ -12,9 +12,9 @@ router : DefaultRouter = DefaultRouter(
 )
 
 router.register(
-    prefix='questions',
+    prefix="questions",
     viewset=QuestionViewSet,
-    basename='questions'
+    basename="questions"
 )
 
 urlpatterns = [

@@ -12,11 +12,11 @@ class Tag(Model):
 
     name = CharField(
         max_length=MAX_NAME_LENGTH,
-        help_text='The name of the tag.'
+        help_text="The name of the tag."
         )
     
     slug = SlugField(
-        help_text='The slug of the tag.',
+        help_text="The slug of the tag.",
     )
     
 
