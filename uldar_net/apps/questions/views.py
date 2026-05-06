@@ -462,8 +462,9 @@ validation_error_response = inline_serializer(
 class QuestionViewSet(ModelViewSet):
     queryset = Question.objects.all()
     lookup_field = "slug"
+    permission_classes = [IsAuthenticated]
 
-    @action(methods=["GET"], permission_classes=[AllowAny], url_path="list", detail=False)
+    @action(methods=["GET"], permission_classes=(AllowAny,), url_path="list", detail=False)
     def list_questions(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         questions = Question.objects.all()
         serializer = QuestionListSerializer(questions, many=True)

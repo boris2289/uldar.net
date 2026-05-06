@@ -65,12 +65,6 @@ TEMPLATES = [
     },
 ]
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -94,11 +88,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-REST_FRAMEWORK = {
-    **REST_FRAMEWORK,
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Uldar Blog API",

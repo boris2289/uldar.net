@@ -18,14 +18,14 @@ SECRET_KEY = config("ULDAR_NET_SECRET_KEY")
 
 
 
-
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": (
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
-    )
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
 }
 
 CORS_ALLOWED_ORIGINS = [
