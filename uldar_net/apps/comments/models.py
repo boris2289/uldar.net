@@ -13,7 +13,7 @@ from apps.users.models import User
 
 class Comments(Model):
     MAX_TEXT_LENGTH = 300
-
+    
     question = ForeignKey(
         to=Question,
         on_delete=CASCADE
