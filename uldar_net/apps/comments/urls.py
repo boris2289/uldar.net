@@ -5,7 +5,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 # Project imports
-from apps.comments.views import CommentViewSet
+from .views import CommentViewSet
 
 router : DefaultRouter = DefaultRouter(
     trailing_slash = False 

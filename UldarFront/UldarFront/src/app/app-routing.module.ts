@@ -33,6 +33,7 @@ const routes: Routes = [
    {path: 'profile', component : ProfileComponent, canActivate : [AuthGuardService]},
   { path: 'about', component: AboutComponent },
   { path: 'newquestion', component: NewQuestionComponent, canActivate: [AuthGuardService], },
+  { path: 'profile/edit', component: PasswordChangeComponent, canActivate: [AuthGuardService] },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', component: NotFoundPageComponent },
 ];

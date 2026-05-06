@@ -1,10 +1,13 @@
+# Django imports
 from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
-from .models import User
+
+# Project imports 
+from apps.users.models import CustomUser
 
 class UserCreationForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
@@ -16,7 +19,7 @@ class UserCreationForm(forms.ModelForm):
     )
 
     class Meta:
-        model = User
+        model = CustomUser
         fields = ["email", "first_name", "last_name"]
 
     def clean_password2(self):
@@ -45,8 +48,8 @@ class UserChangeForm(forms.ModelForm):
     password = ReadOnlyPasswordHashField()
 
     class Meta:
-        model = User
-        fields = ["email", "password", "first_name", "last_name", "is_active", "is_admin"]
+        model = CustomUser
+        fields = ["email", "password", "first_name", "last_name", "is_active", "is_superuser"]
 
 
 class UserAdmin(BaseUserAdmin):
@@ -57,12 +60,12 @@ class UserAdmin(BaseUserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ["email", "first_name", "last_name", "is_admin"]
-    list_filter = ["is_admin"]
+    list_display = ["email", "first_name", "last_name", "is_superuser"]
+    list_filter = ["is_superuser"]
     fieldsets = [
         (None, {"fields": ["email", "password"]}),
         ("Personal info", {"fields": ["first_name", "last_name"]}),
-        ("Permissions", {"fields": ["is_admin"]}),
+        ("Permissions", {"fields": ["is_superuser"]}),
     ]
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
@@ -81,7 +84,7 @@ class UserAdmin(BaseUserAdmin):
 
 
 # Now register the new UserAdmin...
-admin.site.register(User, UserAdmin)
+admin.site.register(CustomUser, UserAdmin)
 # ... and, since we're not using Django's built-in permissions,
 # unregister the Group model from admin.
 admin.site.unregister(Group)

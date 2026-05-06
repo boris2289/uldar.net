@@ -2,7 +2,6 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Django imports
-
 # Rest Framework imports
 from rest_framework.serializers import ModelSerializer, CharField, IntegerField
 
@@ -35,6 +34,7 @@ class TagDetailSerializer(TagBaseSerializer):
         model = Tag
         fields = ['id', 'name', 'slug']
 
+
 class TagListSerializer(TagBaseSerializer):
     """Serializer for a list of tags."""
 
@@ -42,4 +42,3 @@ class TagListSerializer(TagBaseSerializer):
         """Meta class for TagListSerializer."""
         model = Tag
         fields = ['id', 'name', 'slug']
-

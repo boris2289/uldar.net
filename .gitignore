@@ -1,12 +1,15 @@
-# Environment
+# Angular
+UldarFront/UldarFront/node_modules/
+UldarFront/UldarFront/.angular/
+UldarFront/UldarFront/dist/
+
+# Django / Python
+uldar_net/venv2/
 venv/
-uldar_net/config/env/*
-uldar_net/config/.env
-uldar_net/db.sqlite3
-*db.sqlite3
-__pycache__/
 *.pyc
-.idea/
+__pycache__/
+db.sqlite3
 
-
-
+# OS files
+.DS_Store
+Thumbs.db
