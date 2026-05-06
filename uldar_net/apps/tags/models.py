@@ -1,11 +1,9 @@
 # Python imports
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-
 # Django imports
 from django.db import models
 from django.db.models import Model, CharField, IntegerField, ForeignKey, CASCADE, SlugField, TextField
-
 
 class Tag(Model):
     MAX_NAME_LENGTH = 255

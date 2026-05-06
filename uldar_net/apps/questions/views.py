@@ -15,7 +15,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
-from rest_framework.viewsets import ViewSet
+from rest_framework.viewsets import ViewSet, ModelViewSet
 
 from apps.comments.models import Comments
 from apps.comments.serializers import CommentListSerializer, NestedCommentCreateSerializer
@@ -26,6 +26,8 @@ from apps.questions.serializers import (
     QuestionListSerializer,
     QuestionUpdateSerializer,
 )
+# Permissions
+from apps.common.permissions import IsAuthorOrReadOnly
 
 
 question_retrieve_response = inline_serializer(
@@ -453,9 +455,11 @@ validation_error_response = inline_serializer(
         ],
     ),
 )
-class QuestionViewSet(ViewSet):
+class QuestionViewSet(ModelViewSet):
     queryset = Question.objects.all()
     lookup_field = "slug"
+
+    permission_classes = [IsAuthorOrReadOnly]
 
     @action(methods=["GET"], permission_classes=[AllowAny], url_path="list", detail=False)
     def list_questions(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:

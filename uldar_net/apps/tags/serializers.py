@@ -2,13 +2,11 @@
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Django imports
-
 # Rest Framework imports
 from rest_framework.serializers import ModelSerializer, CharField, IntegerField
 
 # Project imports
 from apps.tags.models import Tag
-
 
 class TagBaseSerializer(ModelSerializer):
     """Base Serializer for Tag model."""
