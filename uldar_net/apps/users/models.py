@@ -2,7 +2,6 @@ from django.db.models import EmailField, BooleanField, CharField
 from django.contrib.auth.models import AbstractBaseUser
 from .managers import UserManager
 
-
 class User(AbstractBaseUser):
     email = EmailField(
         verbose_name="email address",
