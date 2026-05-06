@@ -5,7 +5,7 @@ import os
 from django.core.asgi import get_asgi_application
 
 # Project modules
-from config.conf import ENV_ID, ENV_POSSIBLE_OPTIONS
+from settings.conf import ENV_ID, ENV_POSSIBLE_OPTIONS
 
 assert ENV_ID in ENV_POSSIBLE_OPTIONS, f"Invalid env id. Possible options {ENV_POSSIBLE_OPTIONS}"
 

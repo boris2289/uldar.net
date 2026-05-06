@@ -2,7 +2,7 @@
 from pathlib import Path
 
 # Project imports
-from config.conf import *
+from settings.conf import *
 
 
 
@@ -10,8 +10,8 @@ from config.conf import *
 # Path
 #
 BASE_DIR = Path(__file__).resolve().parent.parent
-ROOT_URLCONF = "config.urls"
-WSGI_APPLICATION = "config.wsgi.application"
+ROOT_URLCONF = "settings.urls"
+WSGI_APPLICATION = "settings.wsgi.application"
 AUTH_USER_MODEL = 'users.User'
 
 # ----------------------------------------------

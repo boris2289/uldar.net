@@ -3,7 +3,7 @@ import os
 import sys
 
 # Project modules
-from config.conf import ENV_ID, ENV_POSSIBLE_OPTIONS
+from settings.conf import ENV_ID, ENV_POSSIBLE_OPTIONS
 
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "uldar_net"))
@@ -11,7 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "uldar_net"))
 def main():
     """Run administrative tasks."""
     assert ENV_ID in ENV_POSSIBLE_OPTIONS, f'Set correct BLOG_ENV_ID env var.Possible options: {ENV_POSSIBLE_OPTIONS}'
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'config.env.{ENV_ID}')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'settings.env.{ENV_ID}')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

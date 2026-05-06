@@ -1,6 +1,9 @@
-# Project modules
+# Python imports 
 from decouple import config
 from datetime import timedelta
+
+# Project modules
+
 
 # ----------------------------------------------
 # Env id
@@ -13,7 +16,6 @@ ENV_POSSIBLE_OPTIONS = (
 ENV_ID = config("ULDAR_NET_ENV_ID", cast=str)
 SECRET_KEY = config("ULDAR_NET_SECRET_KEY")
 
-print(ENV_ID)
 
 
 
