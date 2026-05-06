@@ -1,10 +1,8 @@
-from settings.base import *
+from ..settings import *
 
 # You can override specific settings for your local machine here
 DEBUG = True
 
-ROOT_URLCONF = 'settings.urls'
-WSGI_APPLICATION = 'settings.wsgi.application'
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',

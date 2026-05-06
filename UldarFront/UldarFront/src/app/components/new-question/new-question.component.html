@@ -1,0 +1,46 @@
+<form>
+    <h2>Announcement</h2>
+
+    <div class="main_block">
+
+        <div class="block">
+            <h4>Title</h4>
+            <input [(ngModel)]="title" [ngModelOptions]="{ standalone: true }" type="text" placeholder="Go play football" />
+            <p *ngIf="title_empty">Write a announcement!</p>
+        </div>
+
+        <div class="block">
+            <h4>Description</h4>
+            <textarea rows="8" [(ngModel)]="description" [ngModelOptions]="{ standalone: true }" placeholder="We will play football!">
+            </textarea>
+            <p *ngIf="description_empty">Explain the question!</p>
+        </div>
+
+        <!-- TAGS -->
+        <div class="block">
+
+            <h4>Tags</h4>
+            <h6>Write tags like hashtags</h6>
+
+            <div *ngFor="let t of tagInputs; let i = index; trackBy: trackByIndex">
+
+                <input [(ngModel)]="tagInputs[i]" [ngModelOptions]="{ standalone: true }" placeholder="#football" />
+
+            </div>
+
+            <button type="button" (click)="addTag()">➕ Add tag</button>
+
+        </div>
+
+        <button type="button" (click)="check()" class="btn btn-lg btn-primary">
+            Submit
+        </button>
+
+        <div *ngIf="isCompleted" class="confirm-block">
+            <h5>Are you sure there is no such announcement?</h5>
+            <button type="button" (click)="newquestion()" class="btn btn-lg btn-primary">Yes</button>
+            <button type="button" (click)="recheck()" class="btn btn-lg btn-primary">No</button>
+        </div>
+    </div>
+
+</form>
