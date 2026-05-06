@@ -1,10 +1,11 @@
 # Python imports
 from typing import Any
 
-
 # Django imports
-from django.db.models import Model, CharField, TextField, DateTimeField, ManyToManyField, ForeignKey, CASCADE, PROTECT
-
+from django.db.models import (Model, CharField, 
+                              TextField, DateTimeField, 
+                              ManyToManyField, ForeignKey, 
+                              CASCADE, PROTECT)
 
 # Project imports
 from apps.questions.models import Question
