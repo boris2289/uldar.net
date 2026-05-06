@@ -2,8 +2,8 @@ import os
 from datetime import timedelta
 from decouple import config 
 
-ENV_ID = config("ULDAR_NET_ENV_ID", cast="str")
-SECRET_KEY = config("ULDAR_NET_SECRET_KEY", cast="str")
+ENV_ID = config("ULDAR_NET_ENV_ID", cast=str)
+SECRET_KEY = config("ULDAR_NET_SECRET_KEY", cast=str)
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
