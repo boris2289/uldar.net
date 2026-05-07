@@ -20,7 +20,6 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 
-
 # Project imports
 from apps.comments.models import Comments
 from apps.comments.serializers import CommentCreateSerializer, CommentListSerializer, CommentUpdateSerializer
