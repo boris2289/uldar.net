@@ -52,8 +52,9 @@ validation_error_response = inline_serializer(
 @comment_schema
 class CommentViewSet(ViewSet):
     queryset = Comments.objects.all()
-
-    def list(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
+    
+    @action(methods=["GET"], permission_classes=[AllowAny], url_path="list", detail=False)
+    def list_comments(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         comments = Comments.objects.all()
         serializer = CommentListSerializer(comments, many=True)
         return DRFResponse(serializer.data, status=HTTP_200_OK)

@@ -35,7 +35,7 @@ class CustomUserViewSet(ViewSet):
     permission_classes = (IsAuthenticated,)
 
     @action(
-        methods=('POST'),
+        methods=('POST',),
         detail=False,
         url_path='login',
         permission_classes = [AllowAny,]
@@ -60,7 +60,7 @@ class CustomUserViewSet(ViewSet):
 
         return DRFResponse(
             data={
-                'id' : user,
+                'id' : user.id,
                 'email' : user.email,
                 'access' : access_token,
                 'refresh' : str(refresh_token)
@@ -103,7 +103,7 @@ class CustomUserViewSet(ViewSet):
         )        
     
     @action(
-        methods=['POST'],
+        methods=('POST',),
         detail=False,
         url_path='token/refresh',
         permission_classes=[AllowAny]
