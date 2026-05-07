@@ -19,7 +19,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
-from rest_framework.viewsets import ViewSet, ModelViewSet
+from rest_framework.viewsets import ViewSet
 
 # Project imports
 from apps.comments.models import Comments
@@ -459,7 +459,7 @@ validation_error_response = inline_serializer(
         ],
     ),
 )
-class QuestionViewSet(ModelViewSet):
+class QuestionViewSet(ViewSet):
     queryset = Question.objects.all()
     lookup_field = "slug"
     permission_classes = [IsAuthenticated]

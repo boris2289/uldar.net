@@ -31,7 +31,7 @@ class CustomUserViewSet(ViewSet):
     ViewSet for Custom User model
 
     """
-
+    
     permission_classes = (IsAuthenticated,)
 
     @action(

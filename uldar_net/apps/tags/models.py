@@ -5,7 +5,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from django.db import models
 from django.db.models import Model, CharField, IntegerField, ForeignKey, CASCADE, SlugField, TextField
 
-class Tag(Model):
+# Project imports
+from apps.abstract.models import AbstractBaseModel
+
+class Tag(AbstractBaseModel):
     MAX_NAME_LENGTH = 255
 
     name = CharField(
