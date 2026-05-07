@@ -3,7 +3,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Django imports
 from django.db.models import (
-    Model,
     CharField,
     IntegerField,
     ForeignKey,
@@ -18,8 +17,9 @@ from django.db.models import (
 # Project imports
 from apps.tags.models import Tag
 from apps.users.models import CustomUser
+from apps.abstract.models import AbstractBaseModel
 
-class Question(Model):
+class Question(AbstractBaseModel):
     """Model representing a question."""
     MAX_TITLE_LENGTH = 255
 
@@ -47,6 +47,10 @@ class Question(Model):
         blank=True,
     )
 
+    is_active = BooleanField(
+        default=True,
+        help_text="Whether the question is active or not."
+    )
     
     author = ForeignKey(
         to=CustomUser,

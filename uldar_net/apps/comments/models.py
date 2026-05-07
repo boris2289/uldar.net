@@ -16,8 +16,9 @@ from django.db.models import (
 # Project imports
 from apps.questions.models import Question
 from apps.users.models import CustomUser
+from apps.abstract.models import AbstractBaseModel
 
-class Comments(Model):
+class Comments(AbstractBaseModel):
     MAX_TEXT_LENGTH = 300
     
     question = ForeignKey(
@@ -34,11 +35,4 @@ class Comments(Model):
         max_length=MAX_TEXT_LENGTH
     )
 
-    created_at = DateTimeField(
-        auto_now=True
-    )
-
-    updated_at = DateTimeField(
-        auto_now_add=True
-    )
 
