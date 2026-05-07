@@ -6,6 +6,7 @@ uldar_net/settings/env/
 uldar_net/settings/env
 uldar_net/settings/.env
 uldar_net/settings/.env.example
+uldar_net/.env
 
 # Logs
 uldar_net/logs/
