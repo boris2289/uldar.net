@@ -1,5 +1,7 @@
+# Python imports
 import uuid
 
+# Django imports
 from django.utils.text import slugify
 from drf_spectacular.utils import (
     OpenApiExample,
@@ -9,6 +11,8 @@ from drf_spectacular.utils import (
     extend_schema_view,
     inline_serializer,
 )
+
+# Rest-Framework imports
 from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -17,6 +21,7 @@ from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import ViewSet, ModelViewSet
 
+# Project imports
 from apps.comments.models import Comments
 from apps.comments.serializers import CommentListSerializer, NestedCommentCreateSerializer
 from apps.questions.models import Question
@@ -26,8 +31,7 @@ from apps.questions.serializers import (
     QuestionListSerializer,
     QuestionUpdateSerializer,
 )
-# Permissions
-from apps.common.permissions import IsAuthorOrReadOnly
+
 
 
 question_retrieve_response = inline_serializer(
@@ -458,10 +462,9 @@ validation_error_response = inline_serializer(
 class QuestionViewSet(ModelViewSet):
     queryset = Question.objects.all()
     lookup_field = "slug"
+    permission_classes = [IsAuthenticated]
 
-    permission_classes = [IsAuthorOrReadOnly]
-
-    @action(methods=["GET"], permission_classes=[AllowAny], url_path="list", detail=False)
+    @action(methods=["GET"], permission_classes=(AllowAny,), url_path="list", detail=False)
     def list_questions(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         questions = Question.objects.all()
         serializer = QuestionListSerializer(questions, many=True)

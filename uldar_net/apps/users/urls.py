@@ -1,22 +1,26 @@
-from django.urls import path
+# Python imports 
 
-from .api_views import (
-    ChangePasswordView,
-    ListUserView,
-    LoginView,
-    RefreshTokenView,
-    RegisterView,
-    RetrieveUserView,
-    UserMeView,
+# Django imports 
+from django.urls import path, include
+
+# Rest-Framework imports 
+from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenRefreshView
+
+# Project imports 
+from apps.users.views import CustomUserViewSet
+
+router : DefaultRouter = DefaultRouter(
+    trailing_slash = False
 )
 
+router.register(
+    prefix='users',
+    viewset=CustomUserViewSet,
+    basename='user'
+)
 
 urlpatterns = [
-    path("login/", LoginView.as_view(), name="token_obtain_pair"),
-    path("token/refresh/", RefreshTokenView.as_view(), name="token_refresh"),
-    path("users/", ListUserView.as_view(), name="user-list"),
-    path("register/", RegisterView.as_view(), name="register"),
-    path("me/", UserMeView.as_view(), name="me"),
-    path("me/change_password/", ChangePasswordView.as_view(), name="change-password"),
-    path("users/<int:pk>/", RetrieveUserView.as_view(), name="user-retrieve"),
+    path("", include(router.urls)),
+    path("user/token/refresh/", TokenRefreshView.as_view(), name='token_refresh')
 ]

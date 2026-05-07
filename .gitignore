@@ -1,14 +1,26 @@
+# Django / Python
+*.pyc
+__pycache__/
+venv/
+uldar_net/settings/env/
+uldar_net/settings/env
+uldar_net/settings/.env
+uldar_net/settings/.env.example
+
+# Logs
+uldar_net/logs/
+
+# Docs
+uldar_net/docs/
+
+# SQL
+uldar_net/db.sqlite3
+
 # Angular
 UldarFront/UldarFront/node_modules/
 UldarFront/UldarFront/.angular/
 UldarFront/UldarFront/dist/
 
-# Django / Python
-uldar_net/venv2/
-venv/
-*.pyc
-__pycache__/
-db.sqlite3
 
 # OS files
 .DS_Store

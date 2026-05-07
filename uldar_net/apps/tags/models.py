@@ -15,6 +15,7 @@ class Tag(Model):
     
     slug = SlugField(
         help_text="The slug of the tag.",
+        unique=True
     )
     
 

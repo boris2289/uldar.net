@@ -1,11 +1,18 @@
 from pathlib import Path
 from settings.conf import *
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-ROOT_URLCONF = "config.urls"
-WSGI_APPLICATION = "config.wsgi.application"
-AUTH_USER_MODEL = "users.User"
+# Project imports
+from settings.conf import *
 
+
+
+# ----------------------------------------------
+# Path
+#
+BASE_DIR = Path(__file__).resolve().parent.parent
+ROOT_URLCONF = "settings.urls"
+WSGI_APPLICATION = "settings.wsgi.application"
+AUTH_USER_MODEL = 'users.CustomUser'
 
 IMPORTED_APPS = [
     "django.contrib.admin",
@@ -24,6 +31,7 @@ PROJECT_APPS = [
     "apps.tags",
     "apps.questions",
     "apps.comments",
+    'apps.abstract'
 ]
 
 INSTALLED_APPS = PROJECT_APPS + IMPORTED_APPS
@@ -57,12 +65,6 @@ TEMPLATES = [
     },
 ]
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -86,11 +88,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-REST_FRAMEWORK = {
-    **REST_FRAMEWORK,
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-}
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Uldar Blog API",
