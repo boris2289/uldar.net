@@ -5,25 +5,34 @@ from typing import Any, Optional
 # Django imports 
 from django.core.exceptions import ValidationError
 
-
 # Rest-Framework imports 
 from rest_framework.viewsets import ViewSet
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
+    HTTP_401_UNAUTHORIZED
     ) 
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework_simplejwt.tokens import RefreshToken
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiResponse,
+    extend_schema,
+    extend_schema_view,
+    inline_serializer,
+) 
 
 
 # Project imports 
 from apps.users.models import CustomUser
 from apps.users.serializers import *
 from apps.users.decorators import validate_serializer_data
+from apps.common.responses import ERROR_401, ERROR_403, ERROR_404, ERROR_429, VALIDATION_400
+
 
 class CustomUserViewSet(ViewSet):
     """
@@ -34,6 +43,34 @@ class CustomUserViewSet(ViewSet):
     
     permission_classes = (IsAuthenticated,)
 
+    @extend_schema(
+        tags=["Users"],
+        summary="Login",
+        description="Used for authorization",
+        request=UserLoginSerializer,
+        responses={
+            200: OpenApiResponse(response=UserLoginSerializer(), description="Successful Login"),
+            400: VALIDATION_400,
+            401: ERROR_401,
+            403: ERROR_403,
+            404: ERROR_404,
+            429: ERROR_429,
+        },
+        examples=[
+            OpenApiExample(
+                "Login response example",
+                request_only=True,
+                value={ 
+                    'id' : 3,
+                    'email' : "example@mail.com",
+                    'access' : "skdjflksjdf",
+                    'refresh' : "sdjflksdjfl"
+                },
+                status_codes=["200"],
+                
+            )
+        ]
+    )
     @action(
         methods=('POST',),
         detail=False,
@@ -68,6 +105,34 @@ class CustomUserViewSet(ViewSet):
             status=HTTP_200_OK
         )
 
+    @extend_schema(
+        tags=["Users"],
+        summary="Register",
+        description="Register a new user. Sign up",
+        request=UserRegisterSerializer,
+        responses={
+            201: OpenApiResponse(response=UserRegisterSerializer(), description="Successful Registration"),
+            400: VALIDATION_400,
+            401: ERROR_401,
+            403: ERROR_403,
+            404: ERROR_404,
+            429: ERROR_429,
+        },
+        examples=[
+            OpenApiExample(
+                "Login response example",
+                request_only=True,
+                value={ 
+                    'id': 3,
+                    'first_name': "Sardelka",
+                    'last_name': "Zefirov",
+                    'email': "example@mail.ru",
+                },
+                status_codes=["201"],
+                
+            )
+        ]
+    )
     @action(
         methods=('POST',),
         url_path='register',
@@ -102,6 +167,30 @@ class CustomUserViewSet(ViewSet):
             status=HTTP_201_CREATED
         )        
     
+    @extend_schema(
+        tags=["Users"],
+        summary="Refresh Token",
+        description="To remain logged in",
+        responses={
+            200: OpenApiResponse(response=inline_serializer(name="RefreshTokenSerializer", fields={"access": "asdhjkashdk"}), description="Token Refreshed"),
+            400: VALIDATION_400,
+            401: ERROR_401,
+            403: ERROR_403,
+            404: ERROR_404,
+            429: ERROR_429,
+        },
+        examples=[
+            OpenApiExample(
+                "Login response example",
+                request_only=True,
+                value={ 
+                    "access": "asdjklasjdlka"
+                },
+                status_codes=["200"],
+                
+            )
+        ]
+    )
     @action(
         methods=('POST',),
         detail=False,
@@ -119,4 +208,5 @@ class CustomUserViewSet(ViewSet):
             token = RefreshToken(refresh)
             return DRFResponse({"access": str(token.access_token)}, status=HTTP_200_OK)
         except Exception:
-            return DRFResponse({"detail": ("Invalid refresh token")}, status=HTTP_400_BAD_REQUEST)
+            return DRFResponse({"detail": ("Invalid refresh token")}, status=HTTP_401_UNAUTHORIZED)
+

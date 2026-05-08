@@ -61,8 +61,7 @@ class TestRegister:
 
 @pytest.mark.django_db
 class TestTokenRefresh:
-    url = "/api/user/token/refresh/"
-
+    url = "/api/users/token/refresh"
     def test_refresh_success(self, api_client, user):
         from rest_framework_simplejwt.tokens import RefreshToken
         refresh = str(RefreshToken.for_user(user))

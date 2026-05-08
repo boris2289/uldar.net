@@ -11,13 +11,39 @@ from django.db.models import (
     TextField,
     ManyToManyField,
     DateTimeField,
-    BooleanField
+    BooleanField,
+    Manager,
+    Count
 )
 
 # Project imports
 from apps.tags.models import Tag
 from apps.users.models import CustomUser
 from apps.abstract.models import AbstractBaseModel
+
+class QuestionManager(Manager):
+    def get_queryset(self):
+        # Optimization: select_related for FK, prefetch_related for M2M
+        """
+        select_related works by creating a SQL JOIN in your initial query. It follows "one-to-one" or "many-to-one" relationships to pull in the related object's data immediately.
+        How it works: It fetches everything in one single SQL query.
+        When to use: Use it for ForeignKey and OneToOneField.
+        """
+
+        # Annotation: adding a 'tag_count' field dynamically
+        """
+        How Count works with prefetch_related:
+            annotate happens at the Database level (SQL).
+            prefetch_related happens at the Python level (after the first query).
+        
+        Because we have tag_count in the annotation, the database calculates the number of tags. 
+        Because we have prefetch_related('tag'), Django also downloads the full tag objects. 
+        This is perfectly fine and exactly what we need if our API endpoint needs to show both the total number of tags and the list of tag names.
+        """
+        return super().get_queryset().select_related('author').prefetch_related('tag').annotate(
+            tag_count=Count('tag')
+        )
+
 
 class Question(AbstractBaseModel):
     """Model representing a question."""
@@ -57,6 +83,8 @@ class Question(AbstractBaseModel):
         on_delete=CASCADE,
         related_name="questions"
     )
+
+    objects = QuestionManager()
 
     def __str__(self) -> str:
         return self.title
