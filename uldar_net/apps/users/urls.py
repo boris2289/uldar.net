@@ -22,5 +22,5 @@ router.register(
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("user/token/refresh/", TokenRefreshView.as_view(), name='token_refresh')
+    # path("user/token/refresh/", TokenRefreshView.as_view(), name='token_refresh')
 ]

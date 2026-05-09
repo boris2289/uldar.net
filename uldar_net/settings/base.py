@@ -105,4 +105,8 @@ SPECTACULAR_SETTINGS = {
         {"name": "Comments", "description": "Comment endpoints."},
         {"name": "Docs", "description": "OpenAPI schema and UI endpoints."},
     ],
+    'EXCLUDE_PATHS': [
+        '/api/user/token/refresh/',
+        #http://127.0.0.1:8000/api/user/token/refresh/
+    ],
 }
