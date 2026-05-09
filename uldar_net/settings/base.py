@@ -1,5 +1,5 @@
 from pathlib import Path
-from settings.conf import *
+import os
 
 # Project imports
 from settings.conf import *
@@ -109,4 +109,50 @@ SPECTACULAR_SETTINGS = {
         '/api/user/token/refresh/',
         #http://127.0.0.1:8000/api/user/token/refresh/
     ],
+}
+
+# Logging
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "filters": {
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        },
+    },
+    "handlers": {
+        "file": {
+            "level": "WARNING",  # Captures INFO, WARNING, ERROR, and CRITICAL
+            "filters": ["require_debug_true"],
+            "class": "logging.handlers.RotatingFileHandler",
+            "formatter": "verbose",
+            "filename": os.path.join(LOG_DIR, "debug.log"),
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
+        },
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file", "console"], # Sends logs to both file and terminal
+            "level": "INFO", 
+            "propagate": True,
+        },
+    },
 }
