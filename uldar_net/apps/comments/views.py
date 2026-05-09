@@ -8,7 +8,7 @@ from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import ViewSet
-
+from logging import getLogger
 
 # DRF imports
 from drf_spectacular.utils import (
@@ -48,10 +48,24 @@ validation_error_response = inline_serializer(
     },
 )
 
+logger = getLogger('django')
 
 
 class CommentViewSet(ViewSet):
     queryset = Comments.objects.all()
+
+    def _get_log_context(self, request: DRFRequest) -> dict:
+        """Helper to create consistent base logging context."""
+        context = {
+            "path": request.path,
+            "method": request.method,
+            "ip_address": request.META.get('REMOTE_ADDR'),
+            "user_agent": request.META.get('HTTP_USER_AGENT'),
+        }
+        if request.user.is_authenticated:
+            context["user_id"] = request.user.id
+        return context
+
     @extend_schema(
         tags=["Comments"],
         summary="List all comments",
@@ -114,18 +128,22 @@ class CommentViewSet(ViewSet):
     )
     @action(url_path="create", detail=False, permission_classes=[IsAuthenticated], methods=["POST"])
     def create_comment(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
         serializer = CommentCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        try:
+            comment = Comments.objects.create(
+                text=serializer.validated_data["text"],
+                author=request.user,
+                question=serializer.validated_data["question"],
+            )
 
-        comment = Comments.objects.create(
-            text=serializer.validated_data["text"],
-            author=request.user,
-            question=serializer.validated_data["question"],
-        )
-
-        return DRFResponse(CommentListSerializer(comment).data, status=HTTP_201_CREATED)
-
-    
+            return DRFResponse(CommentListSerializer(comment).data, status=HTTP_201_CREATED)
+        except Exception as e:
+            log_extra['error_detail'] = str(e)
+            logger.warning("Creation of Comment failed", extra=log_extra)
+            return DRFResponse({"detail": "Comment creation failed"}, status=500)
+        
     @extend_schema(
         tags=["Comments"],
         summary="Update comment by id",
@@ -153,18 +171,21 @@ class CommentViewSet(ViewSet):
     )
     @action(methods=["PATCH"], permission_classes=[IsAuthenticated], url_path="update", detail=True)
     def update_comment(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
         try:
             comment = Comments.objects.get(pk=kwargs.get("pk"))
         except Comments.DoesNotExist:
+            logger.warning("Update of Comment failed: Comment does not exist", extra=log_extra)
             return DRFResponse({"detail": "The comment does not exist"}, status=HTTP_404_NOT_FOUND)
 
         if comment.author != request.user:
+            logger.warning("Update of Comment failed: Forbidden", extra=log_extra)
             return DRFResponse({"detail": "You can edit only your comment"}, status=HTTP_403_FORBIDDEN)
 
         serializer = CommentUpdateSerializer(comment, data=request.data, partial=True, context={"request": request})
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
+        logger.info("Update of Comment is successful", extra=log_extra)
         return DRFResponse(
             {
                 "details": "The comment successfully updated",
@@ -197,9 +218,13 @@ class CommentViewSet(ViewSet):
     @action(methods=["GET"], permission_classes=[AllowAny], url_path="list_by_author", detail=False)
     def list_comments_by_author(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         author_id = request.query_params.get("author")
+        log_extra = self._get_log_context(request)
+        
         if not author_id:
+            logger.warning('list_comments_by_author no author in request', extra=log_extra)
             return DRFResponse({"detail": "author is required"}, status=HTTP_400_BAD_REQUEST)
 
         comments = Comments.objects.filter(author=author_id)
         serializer = CommentListSerializer(comments, many=True)
+        logger.info('list_comments_by_author successful')
         return DRFResponse(serializer.data, status=HTTP_200_OK)

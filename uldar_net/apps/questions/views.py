@@ -20,6 +20,7 @@ from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import ViewSet
+from logging import getLogger
 
 # Project imports
 from apps.comments.models import Comments
@@ -65,6 +66,7 @@ validation_error_response = inline_serializer(
         "detail": serializers.CharField(required=False),
     },
 )
+logger = getLogger("django")
 
 # @question_schema
 class QuestionViewSet(ViewSet):
@@ -72,6 +74,18 @@ class QuestionViewSet(ViewSet):
     lookup_field = "slug"
     permission_classes = [IsAuthenticated]
 
+    def _get_log_context(self, request: DRFRequest) -> dict:
+        """Helper to create consistent base logging context."""
+        context = {
+            "path": request.path,
+            "method": request.method,
+            "ip_address": request.META.get('REMOTE_ADDR'),
+            "user_agent": request.META.get('HTTP_USER_AGENT'),
+        }
+        if request.user.is_authenticated:
+            context["user_id"] = request.user.id
+        return context
+    
     @extend_schema(
         tags=["Questions"],
         summary="List all questions",
@@ -131,9 +145,11 @@ class QuestionViewSet(ViewSet):
     @action(methods=["GET"], permission_classes=[AllowAny], url_path="retrieve", detail=True)
     def retrieve_question(self, request: DRFRequest, slug: str = None, *args, **kwargs) -> DRFResponse:
         slug = kwargs.get("slug") or kwargs.get("pk") or slug
+        log_extra = self._get_log_context(request)
         try:
             question = Question.objects.get(slug=slug)
         except Question.DoesNotExist:
+            logger.warning("Retrieval of question failed: Question does not exist", extra=log_extra)
             return DRFResponse({"detail": "Question does not exist"}, status=HTTP_404_NOT_FOUND)
 
         comments = Comments.objects.filter(question=question)
@@ -163,13 +179,16 @@ class QuestionViewSet(ViewSet):
     )
     @action(methods=["DELETE"], permission_classes=[IsAuthenticated], url_path="destroy", detail=True)
     def destroy_question(self, request: DRFRequest, slug: str = None, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
         slug = kwargs.get("slug") or kwargs.get("pk") or slug
         try:
             question = Question.objects.get(slug=slug)
         except Question.DoesNotExist:
+            logger.warning("Destruction of question failed: Question does not exist", extra=log_extra)
             return DRFResponse({"detail": "Question does not exist"}, status=HTTP_404_NOT_FOUND)
 
         if question.author != request.user:
+            logger.warning("Destruction of question failed: You are not the author of this question", extra=log_extra)
             return DRFResponse({"detail": "You are not the author of this question"}, status=HTTP_403_FORBIDDEN)
 
         question.delete()
@@ -236,13 +255,16 @@ class QuestionViewSet(ViewSet):
     )
     @action(methods=["PATCH"], permission_classes=[IsAuthenticated], url_path="update", detail=True)
     def update_question(self, request: DRFRequest, slug: str = None, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
         slug = kwargs.get("slug") or kwargs.get("pk") or slug
         try:
             question = Question.objects.get(slug=slug)
         except Question.DoesNotExist:
+            logger.warning("Update of question failed: The question does not exist", extra=log_extra)
             return DRFResponse({"detail": "The question does not exist"}, status=HTTP_404_NOT_FOUND)
 
         if question.author != request.user:
+            logger.warning("Update of question failed: You can edit only your question", extra=log_extra)
             return DRFResponse({"detail": "You can edit only your question"}, status=HTTP_403_FORBIDDEN)
 
         serializer = QuestionUpdateSerializer(question, data=request.data, partial=True, context={"request": request})
@@ -278,10 +300,12 @@ class QuestionViewSet(ViewSet):
     )
     @action(methods=["POST"], permission_classes=[IsAuthenticated], url_path="create_comment", detail=True)
     def create_comment(self, request: DRFRequest, slug: str = None, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
         slug = kwargs.get("slug") or kwargs.get("pk") or slug
         try:
             question = Question.objects.get(slug=slug)
         except Question.DoesNotExist:
+            logger.warning("Creation of comment: Question does not exist", extra=log_extra)
             return DRFResponse({"detail": "Question does not exist"}, status=HTTP_404_NOT_FOUND)
 
         serializer = NestedCommentCreateSerializer(data=request.data)

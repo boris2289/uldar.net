@@ -13,6 +13,7 @@ from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import ViewSet
+from logging import getLogger
 
 from apps.questions.models import Question
 from apps.questions.serializers import QuestionListSerializer
@@ -46,9 +47,23 @@ validation_error_response = inline_serializer(
     },
 )
 
+logger = getLogger("django")
+
 class TagViewSet(ViewSet):
     queryset = Tag.objects.all()
     lookup_field = "slug"
+    
+    def _get_log_context(self, request: DRFRequest) -> dict:
+        """Helper to create consistent base logging context."""
+        context = {
+            "path": request.path,
+            "method": request.method,
+            "ip_address": request.META.get('REMOTE_ADDR'),
+            "user_agent": request.META.get('HTTP_USER_AGENT'),
+        }
+        if request.user.is_authenticated:
+            context["user_id"] = request.user.id
+        return context
     
     @extend_schema(
         tags=["Tags"],
@@ -76,8 +91,10 @@ class TagViewSet(ViewSet):
     )
     @action(methods=["GET"], permission_classes=[IsAuthenticatedOrReadOnly], detail=False, url_path="list")
     def list_tags(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
         tags = Tag.objects.all()
         serializer = TagListSerializer(tags, many=True)
+        logger.info(f"Tags list retrieved. Count: {tags.count()}", extra=log_extra)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
 
 
@@ -101,14 +118,22 @@ class TagViewSet(ViewSet):
     )
     @action(methods=["POST"], permission_classes=[IsAuthenticated], detail=False, url_path="create")
     def create_tag(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
         serializer = TagCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            log_extra["errors"] = serializer.errors
+            logger.warning("Tag creation failed: Validation error", extra=log_extra)
+            serializer.is_valid(raise_exception=True)
+
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
 
         tag = Tag.objects.filter(name=data["name"]).first()
         if tag is None:
+            logger.info(f"New tag created", extra=log_extra)
             tag = Tag.objects.create(name=data["name"], slug=slugify(data["name"]))
-
+        else:
+            logger.info(f"Existing tag returned for name", extra=log_extra)
         return DRFResponse(TagDetailSerializer(tag).data, status=HTTP_201_CREATED)
 
 
@@ -139,9 +164,12 @@ class TagViewSet(ViewSet):
     )
     @action(methods=["GET"], permission_classes=[AllowAny], detail=True, url_path="retrieve")
     def retrieve_tag(self, request: DRFRequest, slug: str = None, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
         try:
+            logger.info(f"Tag retrieved: {slug}", extra=log_extra)
             tag = Tag.objects.get(slug=slug)
         except Tag.DoesNotExist:
+            logger.warning(f"Tag retrieval failed: Slug '{slug}' not found", extra=log_extra)
             return DRFResponse({"detail": "Tag does not exist"}, status=HTTP_404_NOT_FOUND)
 
         questions = Question.objects.filter(tag=tag)
