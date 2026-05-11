@@ -45,4 +45,8 @@ class Comments(AbstractBaseModel):
         max_length=MAX_TEXT_LENGTH
     )
 
+    class Meta:
+        verbose_name = "Comment"
+        verbose_name_plural = "Comments"
+
 
