@@ -1,14 +1,14 @@
-from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer, Serializer, CharField, EmailField
 
 from apps.comments.models import Comments
 
-class CommentBaseSerializer(serializers.ModelSerializer):
+class CommentBaseSerializer(ModelSerializer):
     class Meta:
         model = Comments
         fields = "__all__"
 
 class CommentListSerializer(CommentBaseSerializer):
-    author_email = serializers.EmailField(source="author.email", read_only=True)
+    author_email = EmailField(source="author.email", read_only=True)
 
     class Meta:
         model = Comments
@@ -22,10 +22,15 @@ class CommentCreateSerializer(CommentBaseSerializer):
             "text": {"required": True, "max_length": Comments.MAX_TEXT_LENGTH},
         }
 
-class NestedCommentCreateSerializer(serializers.Serializer):
-    text = serializers.CharField(max_length=Comments.MAX_TEXT_LENGTH)
+class NestedCommentCreateSerializer(Serializer):
+    text = CharField(max_length=Comments.MAX_TEXT_LENGTH)
 
 class CommentUpdateSerializer(CommentBaseSerializer):
+    class Meta:
+        model = Comments
+        fields = ["text"]
+
+class CommentRetrieveSerializer(CommentBaseSerializer):
     class Meta:
         model = Comments
         fields = ["text"]
