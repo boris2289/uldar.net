@@ -3,6 +3,7 @@ import uuid
 
 # Django imports
 from django.utils.text import slugify
+from django.core.cache import cache
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiParameter,
@@ -11,6 +12,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
     inline_serializer,
 )
+from logging import getLogger
 
 # Rest-Framework imports
 from rest_framework import serializers
@@ -20,7 +22,7 @@ from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import ViewSet
-from logging import getLogger
+
 
 # Project imports
 from apps.comments.models import Comments
@@ -112,8 +114,17 @@ class QuestionViewSet(ViewSet):
     )
     @action(methods=["GET"], permission_classes=(AllowAny,), url_path="list", detail=False)
     def list_questions(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
+        questions = cache.get("list_questions")
+        if questions is not None:
+            logger.info("List of Questions were retrieved from Cache", extra=log_extra)
+            return DRFResponse(questions, status=HTTP_200_OK)
+
         questions = Question.objects.all()
+        logger.info("List of Questions were retrieved from DB and stored in Cache", extra=log_extra)
+        
         serializer = QuestionListSerializer(questions, many=True)
+        cache.set("list_questions", serializer.data)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
     
     
@@ -146,20 +157,23 @@ class QuestionViewSet(ViewSet):
     def retrieve_question(self, request: DRFRequest, slug: str = None, *args, **kwargs) -> DRFResponse:
         slug = kwargs.get("slug") or kwargs.get("pk") or slug
         log_extra = self._get_log_context(request)
+        question_comment_data = cache.get(f"question_comment{slug}")
+        if question_comment_data:
+            return DRFResponse(question_comment_data, status=HTTP_200_OK)
         try:
             question = Question.objects.get(slug=slug)
+            logger.info("Retrieval of Questions by SLUG from DB")
+            comments = Comments.objects.filter(question=question)
+            question_comment_data = {
+                "question": QuestionDetailSerializer(question).data,
+                "comments": CommentListSerializer(comments, many=True).data,
+            }
+            cache.set(f"question_comment{slug}", question_comment_data)
+            logger.info("Retrieval of question and its comments by slug from DB was successful", extra=log_extra)
+            return DRFResponse(question_comment_data, status=HTTP_200_OK)
         except Question.DoesNotExist:
             logger.warning("Retrieval of question failed: Question does not exist", extra=log_extra)
             return DRFResponse({"detail": "Question does not exist"}, status=HTTP_404_NOT_FOUND)
-
-        comments = Comments.objects.filter(question=question)
-        return DRFResponse(
-            {
-                "question": QuestionDetailSerializer(question).data,
-                "comments": CommentListSerializer(comments, many=True).data,
-            },
-            status=HTTP_200_OK,
-        )
 
     @extend_schema(
         tags=["Questions"],
@@ -180,6 +194,7 @@ class QuestionViewSet(ViewSet):
     @action(methods=["DELETE"], permission_classes=[IsAuthenticated], url_path="destroy", detail=True)
     def destroy_question(self, request: DRFRequest, slug: str = None, *args, **kwargs) -> DRFResponse:
         log_extra = self._get_log_context(request)
+        
         slug = kwargs.get("slug") or kwargs.get("pk") or slug
         try:
             question = Question.objects.get(slug=slug)
@@ -192,6 +207,9 @@ class QuestionViewSet(ViewSet):
             return DRFResponse({"detail": "You are not the author of this question"}, status=HTTP_403_FORBIDDEN)
 
         question.delete()
+        cache.delete("list_questions")
+        cache.delete(f"question_comment_{slug}")
+        logger.info(f"Question {slug} deleted from DB and cache cleared", extra=log_extra)
         return DRFResponse(status=HTTP_204_NO_CONTENT)
 
     @extend_schema(
@@ -214,6 +232,8 @@ class QuestionViewSet(ViewSet):
     )
     @action(methods=["POST"], permission_classes=[IsAuthenticated], url_path="create", detail=False)
     def create_question(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
+        log_extra = self._get_log_context(request)
+        
         serializer = QuestionCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -230,6 +250,10 @@ class QuestionViewSet(ViewSet):
             author=request.user,
         )
         question.tag.set(data.get("tag", []))
+        logger.info("Question was created", extra=log_extra)
+        cache.delete("list_questions")
+        for tag in question.tag.all():
+            cache.delete(f"tag_full_detail_{tag.slug}")
 
         return DRFResponse(QuestionDetailSerializer(question).data, status=HTTP_201_CREATED)
     
@@ -271,6 +295,11 @@ class QuestionViewSet(ViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
+        cache.delete("list_questions")
+        cache.delete(f"question_comment_{slug}")
+        for tag in question.tag.all():
+            cache.delete(f"tag_full_detail_{tag.slug}")
+        logger.info("Question was deleted", extra=log_extra)
         return DRFResponse(
             {
                 "details": "The question successfully updated",
@@ -316,6 +345,9 @@ class QuestionViewSet(ViewSet):
             author=request.user,
             question=question,
         )
+        
+        cache.delete(f"question_comment_{slug}")
+        logger.info("Comment was created in Question", extra=log_extra)
 
         return DRFResponse(CommentListSerializer(comment).data, status=HTTP_201_CREATED)
 
@@ -341,6 +373,11 @@ class QuestionViewSet(ViewSet):
     @action(methods=["GET"], permission_classes=[AllowAny], url_path="list_by_author", detail=False)
     def list_questions_by_author(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         author_id = request.query_params.get("author")
+        questions = cache.get("question_by_author")
+        if questions is not None:
+            return DRFResponse(questions, status=HTTP_200_OK)
         questions = Question.objects.filter(author=author_id)
         serializer = QuestionListSerializer(questions, many=True)
+
+        cache.set("question_by_author", serializer.data, timeout=600)
         return DRFResponse(serializer.data, status=HTTP_200_OK)

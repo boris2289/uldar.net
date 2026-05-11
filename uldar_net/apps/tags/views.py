@@ -6,6 +6,9 @@ from drf_spectacular.utils import (
     extend_schema_view,
     inline_serializer,
 )
+from django.core.cache import cache
+from logging import getLogger
+
 from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -13,7 +16,7 @@ from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import ViewSet
-from logging import getLogger
+
 
 from apps.questions.models import Question
 from apps.questions.serializers import QuestionListSerializer
@@ -92,7 +95,14 @@ class TagViewSet(ViewSet):
     @action(methods=["GET"], permission_classes=[IsAuthenticatedOrReadOnly], detail=False, url_path="list")
     def list_tags(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         log_extra = self._get_log_context(request)
-        tags = Tag.objects.all()
+        tags = cache.get("tags_list")
+        if tags is None:
+            tags = Tag.objects.all()
+            cache.set("tags_list", tags, timeout=600)
+            logger.info("Tags list retrieved from DB and cached.", extra=log_extra)
+        else:
+            logger.info("Tags list retrieved from cache.", extra=log_extra)
+
         serializer = TagListSerializer(tags, many=True)
         logger.info(f"Tags list retrieved. Count: {tags.count()}", extra=log_extra)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
@@ -127,11 +137,13 @@ class TagViewSet(ViewSet):
 
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-
+        
         tag = Tag.objects.filter(name=data["name"]).first()
         if tag is None:
             logger.info(f"New tag created", extra=log_extra)
             tag = Tag.objects.create(name=data["name"], slug=slugify(data["name"]))
+            cache.delete("tags_list")
+            logger.info("Tags got deleted from cache", extra=log_extra)
         else:
             logger.info(f"Existing tag returned for name", extra=log_extra)
         return DRFResponse(TagDetailSerializer(tag).data, status=HTTP_201_CREATED)
@@ -165,18 +177,25 @@ class TagViewSet(ViewSet):
     @action(methods=["GET"], permission_classes=[AllowAny], detail=True, url_path="retrieve")
     def retrieve_tag(self, request: DRFRequest, slug: str = None, *args, **kwargs) -> DRFResponse:
         log_extra = self._get_log_context(request)
+        cache_key = f"tag_full_detail{slug}"
+        tag = cache.get(cache_key)
+        if tag:
+            logger.info("Tag retrieved from cache.", extra=log_extra)
+            return DRFResponse(tag, status=HTTP_200_OK)
+        
         try:
-            logger.info(f"Tag retrieved: {slug}", extra=log_extra)
             tag = Tag.objects.get(slug=slug)
+            questions = Question.objects.filter(tag=tag)
+            full_response = {
+                "tag": TagDetailSerializer(tag).data,
+                "questions": QuestionListSerializer(questions, many=True).data,
+            }   
+            cache.set(f"tag_full_detail{slug}", full_response, timeout=600)
+            logger.info("Tag retrieved from DB and cached.", extra=log_extra)
+            return DRFResponse(full_response, status=HTTP_200_OK)
+
         except Tag.DoesNotExist:
             logger.warning(f"Tag retrieval failed: Slug '{slug}' not found", extra=log_extra)
             return DRFResponse({"detail": "Tag does not exist"}, status=HTTP_404_NOT_FOUND)
 
-        questions = Question.objects.filter(tag=tag)
-        return DRFResponse(
-            {
-                "tag": TagDetailSerializer(tag).data,
-                "questions": QuestionListSerializer(questions, many=True).data,
-            },
-            status=HTTP_200_OK,
-        )
+        
