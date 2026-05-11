@@ -39,6 +39,7 @@ from apps.users.serializers import (
 )
 from apps.users.decorators import validate_serializer_data
 from apps.common.responses import ERROR_401, ERROR_403, ERROR_404, ERROR_429, VALIDATION_400
+from apps.tasks import send_confirmation_mail
 
 logger = getLogger("django")
 
@@ -191,7 +192,7 @@ class CustomUserViewSet(ViewSet):
             log_extra["user_id"] = user.id
             log_extra["email"] = user.email
             logger.info(f"New user registered: {user.email}", extra=log_extra)
-
+            send_confirmation_mail.delay(user_email=user.email)
             return DRFResponse(
                 data={
                     'id': user.id,

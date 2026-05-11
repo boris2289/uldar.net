@@ -59,5 +59,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 REDIS_HOST = config("ULDAR_NET_REDIS_HOST", cast=str, default="localhost")
 REDIS_PORT = config("ULDAR_NET_REDIS_PORT", cast=int, default=6379)
-# REDIS_CELERY_DB = config("ULDAR_NET_REDIS_CELERY_DB", cast=int, default=1)
+REDIS_CELERY_DB = config("CELERY_ULDAR_NET_REDIS_DB", cast=int, default=1)
+
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # REDIS_DJANGORLAR_DB = config("ULDAR_NET_REDIS_DB", cast=int, default=2)
