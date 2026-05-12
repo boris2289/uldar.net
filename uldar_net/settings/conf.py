@@ -64,3 +64,7 @@ REDIS_CELERY_DB = config("CELERY_ULDAR_NET_REDIS_DB", cast=int, default=1)
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # REDIS_DJANGORLAR_DB = config("ULDAR_NET_REDIS_DB", cast=int, default=2)
+
+# Channels configuration
+ULDAR_NET_CHANNELS_REDIS_HOST = config("ULDAR_NET_REDIS_HOST", cast=str, default="localhost")
+ULDAR_NET_CHANNELS_REDIS_PORT = config("ULDAR_NET_REDIS_PORT", cast=int, default=6379)

@@ -184,3 +184,16 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 3600,  # every hour in seconds
     },
 }
+
+# Channels 
+CHANNELS_REDIS_HOST = ULDAR_NET_CHANNELS_REDIS_HOST
+CHANNELS_REDIS_PORT = ULDAR_NET_CHANNELS_REDIS_PORT
+
+CHANNEL_LAYERS =  {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [f"redis://{CHANNELS_REDIS_HOST}:{CHANNELS_REDIS_PORT}/3"],
+        },
+    },
+}
