@@ -6,9 +6,13 @@ from django.db.models import CharField, EmailField, BooleanField, ImageField, Da
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
+from django.utils.translation import gettext_lazy as _
 
 # Project imports
 from apps.users.validators import check_domain_name
+from apps.abstract.models import AbstractBaseModel
+
+
 
 
 class CustomUserManager(BaseUserManager):
@@ -27,17 +31,17 @@ class CustomUserManager(BaseUserManager):
         """Get Custom User instance"""
         if not email:
             raise ValidationError(
-                message=("Email field is required")
+                message=_("Email field is required")
             )
         
         if not first_name:
             raise ValidationError(
-                message=("First name is required")
+                message=_("First name is required")
             )
 
         if not last_name:
             raise ValidationError(
-                message=("Last name is required")
+                message=_("Last name is required")
             )
 
         new_user : 'CustomUser' = self.model(
@@ -102,7 +106,7 @@ class CustomUserManager(BaseUserManager):
 
         return new_user
 
-class CustomUser(AbstractBaseUser, PermissionsMixin):
+class CustomUser(AbstractBaseUser, PermissionsMixin, AbstractBaseModel):
     """
     Custom User over existing user model
     """
@@ -110,6 +114,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     FIRST_NAME_MAX_LENGTH = 50
     LAST_NAME_MAX_LENGTH = 50
     PASSWORD_MAX_LENGTH = 254
+    SUPPORTED_LANGUAGES = [
+    ('en', 'English'),
+    ('ru', 'Russian'),
+    ('kk', 'Kazakh'),
+    ]
+
 
 
 
@@ -119,44 +129,57 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         max_length=EMAIL_MAX_LENGTH,
         db_index=True,
         validators=[check_domain_name], 
-        verbose_name='Email Address',
-        help_text="User's email address"
+        verbose_name=_('Email Address'),
+        help_text=_('User\'s email address')
         )
     
     first_name = CharField(
         max_length=FIRST_NAME_MAX_LENGTH,
-        verbose_name=('User first name'),
+        verbose_name=_('User first name'),
     )
 
     last_name = CharField(
         max_length=LAST_NAME_MAX_LENGTH,
-        verbose_name=("User last name")
+        verbose_name=_('User last name')
     )
 
     password = CharField(
         max_length=PASSWORD_MAX_LENGTH,
         validators=[validate_password],
-        verbose_name=("User encrypted password")
+        verbose_name=_('User encrypted password')
     )
 
     # True if the user can make the requests to the backend
     is_active = BooleanField(
         default=True,
-        verbose_name=('Active status'),
-        help_text= ('True if the user is active and has an access to request the data')   
+        verbose_name=_('Active status'),
+        help_text=_('True if the user is active and has an access to request the data')   
     )
 
     # True if the user has admin rights
     is_staff = BooleanField(
         default=False,
-        verbose_name=('Staff status'),
-        help_text=('True if user is part of company')
+        verbose_name=_('Staff status'),
+        help_text=_('True if user is part of company')
     )
 
     avatar = ImageField(
         blank=True,
         null=True,
-        verbose_name=('User avatar')
+        verbose_name=_('User avatar')
+    )
+
+    preffered_language = CharField(
+        max_length=10,
+        choices=SUPPORTED_LANGUAGES,
+        default='en',
+        verbose_name=_('Preferred language')
+    )
+
+    timezone = CharField(
+        max_length=50,
+        default='UTC',
+        verbose_name=_('User timezone')
     )
 
     REQUIRED_FIELDS = ["last_name", "first_name"]
@@ -165,7 +188,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         """Meta options for CustomUser"""
-        verbose_name = ('Custom User')
-        verbose_name_plural = ('Custom Users')
-        # To-Do ordering = ["-created_at"]
+        verbose_name = _('Custom User')
+        verbose_name_plural = _('Custom Users')
+        ordering = ["-created_at"]
     

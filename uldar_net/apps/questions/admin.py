@@ -39,9 +39,9 @@ class QuestionAdmin(ModelAdmin):
     )
     def display_tags(self, obj):
         """Creates a string for the tags to be displayed in the list."""
-        return ", ".join([tag.name for tag in obj.tags.all()])
+        return ", ".join([tags.name for tags in obj.tag.all()])
 
-    display_tags.short_description = 'Tags'
+    display_tags.short_description = 'Tag'
 
     
 admin.site.register(Question, QuestionAdmin)

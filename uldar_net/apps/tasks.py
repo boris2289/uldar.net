@@ -16,3 +16,4 @@ def cleanup_expired_sessions():
     from django.utils import timezone
     now = timezone.now().isoformat()
     return f'Periodic health check at {now}'
+

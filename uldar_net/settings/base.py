@@ -41,6 +41,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    'django.middleware.locale.LocaleMiddleware',
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -81,13 +82,31 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+# ----------------------------------------------
+# Internationalization and Localization
+LANGUAGE_CODE = 'ru'
+TIME_ZONE = 'UTC'
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
+LANGUAGES = [
+    ("en", "English"),
+    ("ru", "Russian"),
+    ("kk", "Kazakh")
+]
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale')
+]
+
+# ----------------------------------------------
+# Static files
+
 
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ----------------------------------------------
+# Third-party settings
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Uldar Blog API",

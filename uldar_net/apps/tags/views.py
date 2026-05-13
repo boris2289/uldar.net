@@ -1,3 +1,8 @@
+# Python imports
+from logging import getLogger
+
+
+# Django imports
 from django.utils.text import slugify
 from drf_spectacular.utils import (
     OpenApiExample,
@@ -7,8 +12,9 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 from django.core.cache import cache
-from logging import getLogger
+from django.utils.translation import gettext_lazy as _
 
+# Rest-Framework imports
 from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
@@ -17,7 +23,7 @@ from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import ViewSet
 
-
+# Project imports
 from apps.questions.models import Question
 from apps.questions.serializers import QuestionListSerializer
 from apps.tags.models import Tag
@@ -196,6 +202,6 @@ class TagViewSet(ViewSet):
 
         except Tag.DoesNotExist:
             logger.warning(f"Tag retrieval failed: Slug '{slug}' not found", extra=log_extra)
-            return DRFResponse({"detail": "Tag does not exist"}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse(_("Tag does not exist"), status=HTTP_404_NOT_FOUND)
 
         

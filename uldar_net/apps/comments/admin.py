@@ -16,7 +16,6 @@ from django.core.exceptions import ValidationError
 from apps.comments.models import Comments
 from apps.questions.models import Question
 
-# admin.site.unregister(Question)
 
 class CommentCreationForm(ModelForm):
     class Meta:

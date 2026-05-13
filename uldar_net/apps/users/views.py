@@ -1,9 +1,12 @@
 # Python imports 
 from typing import Any, Optional
+from logging import getLogger
 
 
 # Django imports 
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
 
 # Rest-Framework imports 
 from rest_framework.viewsets import ViewSet
@@ -25,7 +28,6 @@ from drf_spectacular.utils import (
     extend_schema_view,
     inline_serializer,
 ) 
-from logging import getLogger
 
 
 # Project imports 
@@ -35,7 +37,9 @@ from apps.users.serializers import (
     UserLoginFailSerializer,
     UserRegisterResponseSerializer,
     UserRegisterFailSerializer,
-    UserRegisterSerializer
+    UserRegisterSerializer,
+    UserTimezoneUpdateSerializer,
+    UserLanguageUpdateSerializer
 )
 from apps.users.decorators import validate_serializer_data
 from apps.common.responses import ERROR_401, ERROR_403, ERROR_404, ERROR_429, VALIDATION_400
@@ -206,7 +210,7 @@ class CustomUserViewSet(ViewSet):
             log_extra["error"] = str(e)
             log_extra["attempted_email"] = data.get('email')
             logger.warning("User registration failed", extra=log_extra)
-            return DRFResponse({"detail": "Registration failed"}, status=HTTP_400_BAD_REQUEST) 
+            return DRFResponse({"detail": _("Registration failed")}, status=HTTP_400_BAD_REQUEST) 
     
     @extend_schema(
         tags=["Users"],
@@ -267,5 +271,71 @@ class CustomUserViewSet(ViewSet):
             # Log the actual exception type for easier debugging
             log_extra["error_detail"] = str(e)
             logger.warning("Token refresh failed: Invalid or expired token", extra=log_extra)
-            return DRFResponse({"detail": "Invalid refresh token"}, status=HTTP_401_UNAUTHORIZED)
+            return DRFResponse(_("Invalid refresh token"), status=HTTP_401_UNAUTHORIZED)
+    @extend_schema(
+        tags=["Users"],
+        summary="Update Preferred Language",
+        description="Update the user's preferred language for localized content and messages.",
+        request=UserLanguageUpdateSerializer,
+        responses={
+            200: OpenApiResponse(description="Preferred language updated successfully."),
+            400: VALIDATION_400,
+        },
+    )
+    @action(
+        methods=('PUT',),
+        detail=False,
+        url_path='update-language',
+        permission_classes=[IsAuthenticated]
+    )
+    def update_language(
+            self,
+            request: DRFRequest,
+            *args: tuple[Any, ...],
+            **kwargs: dict[str, Any]
 
+    ) -> DRFResponse:
+        """Update user's preferred language"""
+        serializer : UserLanguageUpdateSerializer = UserLanguageUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            language = serializer.validated_data['language']
+            request.user.preferred_language = language
+            request.user.save(update_fields=['preferred_language'])
+            return DRFResponse({"detail": _("Preferred language updated successfully")}, status=HTTP_200_OK)
+        else:
+            return DRFResponse(serializer.errors, status=HTTP_400_BAD_REQUEST)
+        
+        
+    @extend_schema(
+        tags=["Users"],
+        summary="Update Preferred Time Zone",
+        description="Update the user's preferred time zone for accurate time displays and scheduling.",
+        request=UserTimezoneUpdateSerializer,
+        responses={
+            200: OpenApiResponse(description="Preferred time zone updated successfully."),
+            400: VALIDATION_400,
+        },
+    )
+    @action(
+        methods=('PUT',),
+        detail=False,
+        url_path='update-timezone',
+        permission_classes=[IsAuthenticated]
+    )
+    def update_timezone(
+            self,
+            request: DRFRequest,
+            *args: tuple[Any, ...],
+            **kwargs: dict[str, Any]
+
+    ) -> DRFResponse:
+        """Update user's preferred time zone"""
+        serializer : UserTimezoneUpdateSerializer = UserTimezoneUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            timezone = serializer.validated_data['timezone']
+            request.user.preferred_timezone = timezone
+            request.user.save(update_fields=['preferred_timezone'])
+            return DRFResponse({"detail": _("Preferred time zone updated successfully")}, status=HTTP_200_OK)
+        else:
+            return DRFResponse(serializer.errors, status=HTTP_400_BAD_REQUEST)
+        

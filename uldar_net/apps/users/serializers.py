@@ -4,6 +4,7 @@ from typing import Any, Optional
 # Django imports 
 from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
+from django.utils.translation import gettext_lazy as _
 
 # Rest-Framework imports
 from rest_framework.serializers import (
@@ -67,11 +68,11 @@ class UserLoginSerializer(Serializer):
 
         if not user:
             raise ValidationError(
-                {"email": ("User with this email %(email)s does not exist") % {"email": email}}
+                {"email": _("User with this email %(email)s does not exist") % {"email": email}}
             )
 
         if not user.check_password(raw_password=password):
-            raise ValidationError({"password": ("Incorrect password")})
+            raise ValidationError({"password": _("Incorrect password")})
 
         attrs['user'] = user
         return super().validate(attrs)
@@ -114,7 +115,7 @@ class UserRegisterSerializer(Serializer):
         value = value.lower()
         if CustomUser.objects.filter(email=value).exists():
             raise ValidationError(
-                message=f"This email address {value} already exist"
+                message=_(f"This email address {value} already exist")
             )
         return value
 
@@ -124,6 +125,27 @@ class UserRegisterSerializer(Serializer):
         except ValidationError as e:
             raise ValidationError(list(e.messages))
         return value
+    
+class UserLanguageUpdateSerializer(Serializer):
+    """Serializer for updating user's preferred language"""
+    language = ChoiceField(choices=CustomUser.SUPPORTED_LANGUAGES, required=True)
+    label = _("Preferred Language")
+
+    class Meta:
+        fields = ('language',)
+
+    def validate_language(self, value: str) -> str:
+        if value not in dict(CustomUser.SUPPORTED_LANGUAGES):
+            raise DRFValidationError(_("Unsupported language choice"))
+        return value
+
+class UserTimezoneUpdateSerializer(Serializer):
+    """Serializer for updating user's preferred time zone"""
+    timezone = CharField(required=True, max_length=50)
+    label = _("Preferred Time Zone")
+
+    class Meta:
+        fields = ('timezone',)
 
 
 

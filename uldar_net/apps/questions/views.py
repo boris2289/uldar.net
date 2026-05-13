@@ -1,5 +1,7 @@
 # Python imports
 import uuid
+from logging import getLogger
+
 
 # Django imports
 from django.utils.text import slugify
@@ -12,7 +14,7 @@ from drf_spectacular.utils import (
     extend_schema_view,
     inline_serializer,
 )
-from logging import getLogger
+from django.utils.translation import gettext_lazy as _
 
 # Rest-Framework imports
 from rest_framework import serializers
@@ -173,7 +175,7 @@ class QuestionViewSet(ViewSet):
             return DRFResponse(question_comment_data, status=HTTP_200_OK)
         except Question.DoesNotExist:
             logger.warning("Retrieval of question failed: Question does not exist", extra=log_extra)
-            return DRFResponse({"detail": "Question does not exist"}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse(_("Question does not exist"), status=HTTP_404_NOT_FOUND)
 
     @extend_schema(
         tags=["Questions"],
@@ -200,11 +202,11 @@ class QuestionViewSet(ViewSet):
             question = Question.objects.get(slug=slug)
         except Question.DoesNotExist:
             logger.warning("Destruction of question failed: Question does not exist", extra=log_extra)
-            return DRFResponse({"detail": "Question does not exist"}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse(_("Question does not exist"), status=HTTP_404_NOT_FOUND)
 
         if question.author != request.user:
             logger.warning("Destruction of question failed: You are not the author of this question", extra=log_extra)
-            return DRFResponse({"detail": "You are not the author of this question"}, status=HTTP_403_FORBIDDEN)
+            return DRFResponse(_("You are not the author of this question"), status=HTTP_403_FORBIDDEN)
 
         question.delete()
         cache.delete("list_questions")
@@ -245,7 +247,7 @@ class QuestionViewSet(ViewSet):
 
         question = Question.objects.create(
             title=data["title"],
-            description=data.get("description"),
+            description=data.get("description", ""),
             slug=slug,
             author=request.user,
         )
@@ -285,11 +287,11 @@ class QuestionViewSet(ViewSet):
             question = Question.objects.get(slug=slug)
         except Question.DoesNotExist:
             logger.warning("Update of question failed: The question does not exist", extra=log_extra)
-            return DRFResponse({"detail": "The question does not exist"}, status=HTTP_404_NOT_FOUND)
+            return DRFResponse(_("The question does not exist"), status=HTTP_404_NOT_FOUND)
 
         if question.author != request.user:
             logger.warning("Update of question failed: You can edit only your question", extra=log_extra)
-            return DRFResponse({"detail": "You can edit only your question"}, status=HTTP_403_FORBIDDEN)
+            return DRFResponse(_("You can edit only your question"), status=HTTP_403_FORBIDDEN)
 
         serializer = QuestionUpdateSerializer(question, data=request.data, partial=True, context={"request": request})
         serializer.is_valid(raise_exception=True)
