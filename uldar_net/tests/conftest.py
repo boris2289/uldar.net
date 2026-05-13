@@ -17,7 +17,10 @@ def create_user(db, django_user_model):
         kwargs.setdefault("password", "StrongPass123!")
         email = kwargs.pop("email")
         password = kwargs.pop("password")
-        return django_user_model.objects.create_user(email=email, password=password, **kwargs)
+        return django_user_model.objects.create_user(
+            email=email, password=password, **kwargs
+        )
+
     return make_user
 
 
@@ -49,12 +52,14 @@ def another_auth_client(api_client, another_user):
 @pytest.fixture
 def tag(db):
     from apps.tags.models import Tag
+
     return Tag.objects.create(name="Python", slug="python")
 
 
 @pytest.fixture
 def question(db, user, tag):
     from apps.questions.models import Question
+
     q = Question.objects.create(
         title="How to use serializers in Django?",
         description="Please explain with a simple example.",
@@ -68,11 +73,13 @@ def question(db, user, tag):
 @pytest.fixture
 def comment(db, user, question):
     from apps.comments.models import Comments
+
     return Comments.objects.create(
         text="This is a test comment.",
         author=user,
         question=question,
     )
+
 
 @pytest.fixture(autouse=True)
 def use_locmem_cache(settings):
@@ -82,4 +89,5 @@ def use_locmem_cache(settings):
         }
     }
     from django.core.cache import cache
+
     cache.clear()

@@ -1,5 +1,9 @@
-from channels.generic.websocket import AsyncJsonWebsocketConsumer
+# Python imports
 import uuid 
+
+
+# Channels imports
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 
 class AdminChatConsumer(AsyncJsonWebsocketConsumer):

@@ -1,4 +1,8 @@
+# Django imports
 from django.urls import re_path
+
+
+# Project imports
 from apps.chat.consumers import AdminChatConsumer, PublicChatConsumer
 
 websocket_urlpatterns = [
