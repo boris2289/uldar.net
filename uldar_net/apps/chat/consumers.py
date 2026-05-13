@@ -57,7 +57,6 @@ class PublicChatConsumer(AsyncJsonWebsocketConsumer):
 
     async def connect(self):
         self.user = self.scope["user"]
-        self.user_group = f"user_{self.user.id}"
         await self.channel_layer.group_add(self.ROOM_GROUP, self.channel_name)
         await self.accept()
         await self.send_json({"type": "welcome"})

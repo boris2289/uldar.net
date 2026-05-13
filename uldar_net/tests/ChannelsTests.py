@@ -1,5 +1,5 @@
 import pytest
-from apps.consumers import PublicChatConsumer, AdminChatConsumer
+from apps.chat.consumers import PublicChatConsumer, AdminChatConsumer
 from channels.testing import WebsocketCommunicator
 from channels.db import database_sync_to_async
 from apps.users.models import CustomUser
@@ -17,7 +17,7 @@ def create_user(email, password="test123!") -> CustomUser:
 @pytest.mark.django_db(transaction=True)
 class TestOpenConsumers:
 
-    url = "/chat"
+    url = "ws/chat/public/"
     @pytest.mark.asyncio
     async def test_public_connect(self):
         communicator = WebsocketCommunicator(PublicChatConsumer.as_asgi(), self.url)
@@ -67,7 +67,7 @@ class TestOpenConsumers:
 
 @pytest.mark.django_db(transaction=True)  
 class TestAdminConsumers:
-    url = "/chat/admin/"
+    url = "ws/chat/admin/"
     
     @pytest.mark.asyncio
     async def test_admin_connect(self):
