@@ -13,7 +13,7 @@ from django.db.models import (
     DateTimeField,
     BooleanField,
     Manager,
-    Count
+    Count,
 )
 from django.utils.translation import gettext_lazy as _
 
@@ -21,6 +21,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.tags.models import Tag
 from apps.users.models import CustomUser
 from apps.abstract.models import AbstractBaseModel
+
 
 class QuestionManager(Manager):
     def get_queryset(self):
@@ -41,30 +42,30 @@ class QuestionManager(Manager):
         Because we have prefetch_related('tag'), Django also downloads the full tag objects. 
         This is perfectly fine and exactly what we need if our API endpoint needs to show both the total number of tags and the list of tag names.
         """
-        return super().get_queryset().select_related('author').prefetch_related('tag').annotate(
-            tag_count=Count('tag')
+        return (
+            super()
+            .get_queryset()
+            .select_related("author")
+            .prefetch_related("tag")
+            .annotate(tag_count=Count("tag"))
         )
 
 
 class Question(AbstractBaseModel):
     """Model representing a question."""
+
     MAX_TITLE_LENGTH = 255
 
     title = CharField(
-        max_length=MAX_TITLE_LENGTH,
-        help_text=_("The title of the question.")
+        max_length=MAX_TITLE_LENGTH, help_text=_("The title of the question.")
     )
 
     description = TextField(
-        blank=True,
-        null=True,
-        help_text=_("The description of the question.")
+        blank=True, null=True, help_text=_("The description of the question.")
     )
 
     slug = SlugField(
-        verbose_name=_("Slug"),
-        unique=True,
-        help_text=_("The slug of the question.")
+        verbose_name=_("Slug"), unique=True, help_text=_("The slug of the question.")
     )
 
     tag = ManyToManyField(
@@ -75,23 +76,18 @@ class Question(AbstractBaseModel):
     )
 
     is_active = BooleanField(
-        default=True,
-        help_text=_("Whether the question is active or not.")
+        default=True, help_text=_("Whether the question is active or not.")
     )
-    
-    author = ForeignKey(
-        to=CustomUser,
-        on_delete=CASCADE,
-        related_name="questions"
-    )
+
+    author = ForeignKey(to=CustomUser, on_delete=CASCADE, related_name="questions")
 
     objects = QuestionManager()
 
     def __str__(self) -> str:
         return self.title
-    
+
     class Meta:
         """Meta class for Question model."""
+
         verbose_name = "Question"
         verbose_name_plural = "Questions"
-        

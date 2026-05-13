@@ -19,15 +19,36 @@ class QuestionCreateSerializer(QuestionBaseSerializer):
             "tag": {"required": False},
         }
 
+
 class QuestionDetailSerializer(QuestionBaseSerializer):
     class Meta:
         model = Question
-        fields = ["id", "title", "description", "slug", "tag", "author", "created_at", "is_active"]
+        fields = [
+            "id",
+            "title",
+            "description",
+            "slug",
+            "tag",
+            "author",
+            "created_at",
+            "is_active",
+        ]
+
 
 class QuestionListSerializer(QuestionBaseSerializer):
     class Meta:
         model = Question
-        fields = ["id", "title", "description", "slug", "tag", "author", "is_active", "created_at"]
+        fields = [
+            "id",
+            "title",
+            "description",
+            "slug",
+            "tag",
+            "author",
+            "is_active",
+            "created_at",
+        ]
+
 
 class QuestionUpdateSerializer(QuestionBaseSerializer):
     class Meta:

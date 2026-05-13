@@ -1,24 +1,18 @@
-# Python imports 
+# Python imports
 
-# Django imports 
+# Django imports
 from django.urls import path, include
 
-# Rest-Framework imports 
+# Rest-Framework imports
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
-# Project imports 
+# Project imports
 from apps.users.views import CustomUserViewSet
 
-router : DefaultRouter = DefaultRouter(
-    trailing_slash = False
-)
+router: DefaultRouter = DefaultRouter(trailing_slash=False)
 
-router.register(
-    prefix='users',
-    viewset=CustomUserViewSet,
-    basename='user'
-)
+router.register(prefix="users", viewset=CustomUserViewSet, basename="user")
 
 urlpatterns = [
     path("", include(router.urls)),

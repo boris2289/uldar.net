@@ -1,27 +1,21 @@
 # Django imports
-from django.forms import (
-    ModelForm,
-    CharField,
-    PasswordInput
-)
+from django.forms import ModelForm, CharField, PasswordInput
 from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.core.exceptions import ValidationError
 
-
-# Project imports 
+# Project imports
 from apps.users.models import CustomUser
+
 
 class UserCreationForm(ModelForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password."""
 
     password1 = CharField(label="Password", widget=PasswordInput)
-    password2 = CharField(
-        label="Password confirmation", widget=PasswordInput
-    )
+    password2 = CharField(label="Password confirmation", widget=PasswordInput)
 
     class Meta:
         model = CustomUser
@@ -54,7 +48,16 @@ class UserChangeForm(ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ["email", "password", "first_name", "last_name", "is_active", "is_superuser", "preffered_language", "timezone"]
+        fields = [
+            "email",
+            "password",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_superuser",
+            "preffered_language",
+            "timezone",
+        ]
 
 
 class UserAdmin(BaseUserAdmin):
@@ -69,7 +72,10 @@ class UserAdmin(BaseUserAdmin):
     list_filter = ["is_superuser"]
     fieldsets = [
         (None, {"fields": ["email", "password"]}),
-        ("Personal info", {"fields": ["first_name", "last_name", "preferred_language", "timezone"]}),
+        (
+            "Personal info",
+            {"fields": ["first_name", "last_name", "preferred_language", "timezone"]},
+        ),
         ("Permissions", {"fields": ["is_superuser"]}),
     ]
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
@@ -79,7 +85,13 @@ class UserAdmin(BaseUserAdmin):
             None,
             {
                 "classes": ["wide"],
-                "fields": ["email", "first_name", "last_name", "password1", "password2"],
+                "fields": [
+                    "email",
+                    "first_name",
+                    "last_name",
+                    "password1",
+                    "password2",
+                ],
             },
         ),
     ]

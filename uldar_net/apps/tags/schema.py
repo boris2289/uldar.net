@@ -7,9 +7,18 @@ from drf_spectacular.utils import (
 )
 
 from apps.questions.serializers import QuestionListSerializer
-from apps.tags.serializers import TagCreateSerializer, TagDetailSerializer, TagListSerializer
-from apps.common.responses import ERROR_401, ERROR_403, ERROR_404, ERROR_429, VALIDATION_400
-
+from apps.tags.serializers import (
+    TagCreateSerializer,
+    TagDetailSerializer,
+    TagListSerializer,
+)
+from apps.common.responses import (
+    ERROR_401,
+    ERROR_403,
+    ERROR_404,
+    ERROR_429,
+    VALIDATION_400,
+)
 
 tag_retrieve_response = inline_serializer(
     name="TagRetrieveResponse",
@@ -26,7 +35,10 @@ tag_schema = extend_schema_view(
         summary="List all tags",
         description="Returns a list of all tags. Authentication is not required.",
         responses={
-            200: OpenApiResponse(response=TagListSerializer(many=True), description="Tags were returned successfully."),
+            200: OpenApiResponse(
+                response=TagListSerializer(many=True),
+                description="Tags were returned successfully.",
+            ),
             400: VALIDATION_400,
             401: ERROR_401,
             403: ERROR_403,
@@ -51,7 +63,10 @@ tag_schema = extend_schema_view(
         description="Creates a new tag. If a tag with the same name exists, the existing tag is returned.",
         request=TagCreateSerializer,
         responses={
-            201: OpenApiResponse(response=TagDetailSerializer, description="Tag was created successfully."),
+            201: OpenApiResponse(
+                response=TagDetailSerializer,
+                description="Tag was created successfully.",
+            ),
             400: VALIDATION_400,
             401: ERROR_401,
             403: ERROR_403,
@@ -59,8 +74,17 @@ tag_schema = extend_schema_view(
             429: ERROR_429,
         },
         examples=[
-            OpenApiExample("Create tag request example", request_only=True, value={"name": "Machine Learning"}),
-            OpenApiExample("Create tag response example", response_only=True, status_codes=["201"], value={"id": 3, "name": "Machine Learning", "slug": "machine-learning"}),
+            OpenApiExample(
+                "Create tag request example",
+                request_only=True,
+                value={"name": "Machine Learning"},
+            ),
+            OpenApiExample(
+                "Create tag response example",
+                response_only=True,
+                status_codes=["201"],
+                value={"id": 3, "name": "Machine Learning", "slug": "machine-learning"},
+            ),
         ],
     ),
     retrieve_tag=extend_schema(
@@ -68,7 +92,10 @@ tag_schema = extend_schema_view(
         summary="Retrieve tag by slug",
         description="Returns detailed information about a tag and the list of questions linked to it.",
         responses={
-            200: OpenApiResponse(response=tag_retrieve_response, description="Tag and related questions were returned successfully."),
+            200: OpenApiResponse(
+                response=tag_retrieve_response,
+                description="Tag and related questions were returned successfully.",
+            ),
             400: VALIDATION_400,
             401: ERROR_401,
             403: ERROR_403,
@@ -82,10 +109,21 @@ tag_schema = extend_schema_view(
                 status_codes=["200"],
                 value={
                     "tag": {"id": 1, "name": "Django", "slug": "django"},
-                    "questions": [{"id": 10, "title": "How to use serializers?", "slug": "how-to-use-serializers"}],
+                    "questions": [
+                        {
+                            "id": 10,
+                            "title": "How to use serializers?",
+                            "slug": "how-to-use-serializers",
+                        }
+                    ],
                 },
             ),
-            OpenApiExample("Retrieve tag not found example", response_only=True, status_codes=["404"], value={"detail": "Tag does not exist"}),
+            OpenApiExample(
+                "Retrieve tag not found example",
+                response_only=True,
+                status_codes=["404"],
+                value={"detail": "Tag does not exist"},
+            ),
         ],
     ),
 )

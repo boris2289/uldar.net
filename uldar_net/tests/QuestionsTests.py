@@ -1,11 +1,14 @@
 import pytest
 
+
 @pytest.fixture(autouse=True)
 def clear_cache():
     from django.core.cache import cache
+
     cache.clear()
     yield
     cache.clear()
+
 
 @pytest.mark.django_db
 class TestListQuestions:
@@ -26,7 +29,6 @@ class TestListQuestions:
         assert response.status_code == 405
 
 
-
 @pytest.mark.django_db
 class TestRetrieveQuestion:
     def test_retrieve_question_success(self, api_client, question):
@@ -44,44 +46,56 @@ class TestRetrieveQuestion:
         assert response.status_code == 405
 
 
-
 @pytest.mark.django_db
 class TestCreateQuestion:
     url = "/api/questions/create"
 
     def test_create_question_success(self, auth_client, tag):
-        response = auth_client.post(self.url, {
-            "title": "How to use Django signals?",
-            "description": "Please explain with an example.",
-            "tag": [tag.id],
-        })
+        response = auth_client.post(
+            self.url,
+            {
+                "title": "How to use Django signals?",
+                "description": "Please explain with an example.",
+                "tag": [tag.id],
+            },
+        )
         assert response.status_code == 201
         assert response.data["title"] == "How to use Django signals?"
 
     def test_create_question_unauthenticated(self, api_client, tag):
-        response = api_client.post(self.url, {
-            "title": "How to use Django signals?",
-            "description": "Please explain with an example.",
-            "tag": [tag.id],
-        })
+        response = api_client.post(
+            self.url,
+            {
+                "title": "How to use Django signals?",
+                "description": "Please explain with an example.",
+                "tag": [tag.id],
+            },
+        )
         assert response.status_code == 401
 
     def test_create_question_missing_title(self, auth_client):
-        response = auth_client.post(self.url, {
-            "description": "No title provided.",
-        })
+        response = auth_client.post(
+            self.url,
+            {
+                "description": "No title provided.",
+            },
+        )
         assert response.status_code == 400
 
     def test_create_question_cache_hit(self, auth_client, tag):
-        response = auth_client.post(self.url, {
-            "title": "How to use Django signals?",
-            "description": "Please explain with an example.",
-            "tag": [tag.id],
-        })
+        response = auth_client.post(
+            self.url,
+            {
+                "title": "How to use Django signals?",
+                "description": "Please explain with an example.",
+                "tag": [tag.id],
+            },
+        )
         assert response.status_code == 201
 
         from django.core.cache import cache
-        assert cache.get('tags_list') is None
+
+        assert cache.get("tags_list") is None
 
 
 @pytest.mark.django_db
@@ -102,44 +116,47 @@ class TestDestroyQuestion:
 @pytest.mark.django_db
 class TestUpdateQuestion:
     def test_update_question_success(self, auth_client, question):
-        response = auth_client.patch(f"/api/questions/{question.slug}/update", {
-            "title": "Updated title"
-        })
+        response = auth_client.patch(
+            f"/api/questions/{question.slug}/update", {"title": "Updated title"}
+        )
         assert response.status_code == 200
         assert response.data["data"]["title"] == "Updated title"
 
     def test_update_question_not_author(self, another_auth_client, question):
-        response = another_auth_client.patch(f"/api/questions/{question.slug}/update", {
-            "title": "Hacked title"
-        })
+        response = another_auth_client.patch(
+            f"/api/questions/{question.slug}/update", {"title": "Hacked title"}
+        )
         assert response.status_code == 403
 
     def test_update_question_not_found(self, auth_client):
-        response = auth_client.patch("/api/questions/nonexistent-slug/update", {
-            "title": "Updated title"
-        })
+        response = auth_client.patch(
+            "/api/questions/nonexistent-slug/update", {"title": "Updated title"}
+        )
         assert response.status_code == 404
 
 
 @pytest.mark.django_db
 class TestCreateCommentOnQuestion:
     def test_create_comment_success(self, auth_client, question):
-        response = auth_client.post(f"/api/questions/{question.slug}/create_comment", {
-            "text": "Great question!"
-        })
+        response = auth_client.post(
+            f"/api/questions/{question.slug}/create_comment",
+            {"text": "Great question!"},
+        )
         assert response.status_code == 201
         assert response.data["text"] == "Great question!"
 
     def test_create_comment_unauthenticated(self, api_client, question):
-        response = api_client.post(f"/api/questions/{question.slug}/create_comment", {
-            "text": "Great question!"
-        })
+        response = api_client.post(
+            f"/api/questions/{question.slug}/create_comment",
+            {"text": "Great question!"},
+        )
         assert response.status_code == 401
 
     def test_create_comment_question_not_found(self, auth_client):
-        response = auth_client.post("/api/questions/nonexistent-slug/create_comment", {
-            "text": "Great question!"
-        })
+        response = auth_client.post(
+            "/api/questions/nonexistent-slug/create_comment",
+            {"text": "Great question!"},
+        )
         assert response.status_code == 404
 
 
@@ -164,34 +181,44 @@ class TestListQuestionsByAuthor:
 
 @pytest.mark.django_db
 class TestCacheInvalidation:
-    
+
     def test_create_question_clears_list_cache(self, auth_client, tag):
         from django.core.cache import cache
+
         cache.set("list_questions", [{"title": "Old Question"}])
-        
-        auth_client.post("/api/questions/create", {
-            "title": "New Cache Breaking Question",
-            "tag": [tag.id],
-        })
-        
+
+        auth_client.post(
+            "/api/questions/create",
+            {
+                "title": "New Cache Breaking Question",
+                "tag": [tag.id],
+            },
+        )
+
         assert cache.get("list_questions") is None
 
     def test_update_question_clears_detail_cache(self, auth_client, question):
         from django.core.cache import cache
+
         cache_key = f"question_comment_{question.slug}"
-        
+
         cache.set(cache_key, {"title": "Cached Title"})
-        
-        auth_client.patch(f"/api/questions/{question.slug}/update", {"title": "Real Title"})
-        
+
+        auth_client.patch(
+            f"/api/questions/{question.slug}/update", {"title": "Real Title"}
+        )
+
         assert cache.get(cache_key) is None
 
     def test_create_comment_clears_question_cache(self, auth_client, question):
         from django.core.cache import cache
+
         cache_key = f"question_comment_{question.slug}"
-        
+
         cache.set(cache_key, {"question": "info", "comments": []})
-        
-        auth_client.post(f"/api/questions/{question.slug}/create_comment", {"text": "New Comment"})
-        
+
+        auth_client.post(
+            f"/api/questions/{question.slug}/create_comment", {"text": "New Comment"}
+        )
+
         assert cache.get(cache_key) is None
