@@ -1,5 +1,3 @@
-import os
-
 from django.core.management.base import BaseCommand
 from django.utils.text import slugify
 
@@ -10,31 +8,66 @@ from apps.users.models import CustomUser
 
 
 class Command(BaseCommand):
-    help = 'Seed the database with sample'
+    help = "Seed the database with sample data for all models"
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--flush",
+            action="store_true",
+            help="Clear existing data before seeding",
+        )
 
     def handle(self, *args, **options):
+        if options["flush"]:
+            self.stdout.write(self.style.WARNING("Flushing existing data..."))
+            Comments.objects.all().delete()
+            Question.objects.all().delete()
+            Tag.objects.all().delete()
+            CustomUser.objects.filter(is_superuser=False).delete()
+            self.stdout.write("  Cleared comments, questions, tags, and non-admin users")
+
+        if CustomUser.objects.filter(email="new1234@gmail.com").exists():
+            self.stdout.write(self.style.WARNING("Seed data already exists. Use --flush to recreate."))
+            return
+
+        self.stdout.write("Seeding database...\n")
+
+        # ── Users ──
         users = []
-        emails = ["new1234@gmail.com", "real1234@gmail.com", "test1234@gmail.com"]
-        for i, email in enumerate(emails):
-            user = CustomUser.objects.create(email=email, password="default123")
-            user.save()
-            print(f"New user {email}")
-
+        user_data = [
+            ("new1234@gmail.com", "Test", "One"),
+            ("real1234@gmail.com", "Test", "Two"),
+            ("test1234@gmail.com", "Test", "Three"),
+        ]
+        for email, first, last in user_data:
+            user = CustomUser.objects.create_user(
+                email=email,
+                password="default123",
+                first_name=first,
+                last_name=last,
+            )
             users.append(user)
+        self.stdout.write(f"  Created {len(users)} users")
 
+        # ── Tags ──
         tag_names = ["python", "django", "celery", "docker", "redis"]
-        tags = []
+        tags = {}
         for name in tag_names:
-            tag = Tag.objects.create(name=name, slug=slugify(name))
-            tags.append(tag)
+            tag, _ = Tag.objects.get_or_create(
+                slug=slugify(name),
+                defaults={"name": name},
+            )
+            tags[name] = tag
+        self.stdout.write(f"  Created {len(tags)} tags")
 
+        # ── Questions ──
         q1 = Question.objects.create(
             title="Set up celery",
             description="Backend background tasks. How to do them",
             author=users[0],
             slug="how-to-set-up-celery12",
         )
-        q1.tag.add(tags[0], tags[1], tags[2])
+        q1.tag.add(tags["python"], tags["django"], tags["celery"])
 
         q2 = Question.objects.create(
             title="Docker. How to configure",
@@ -42,7 +75,7 @@ class Command(BaseCommand):
             author=users[1],
             slug="how-to-set-up-docker12",
         )
-        q2.tag.add(tags[0], tags[1], tags[2])
+        q2.tag.add(tags["python"], tags["django"], tags["celery"])
 
         q3 = Question.objects.create(
             title="Redis. How to configure",
@@ -50,29 +83,37 @@ class Command(BaseCommand):
             author=users[2],
             slug="how-to-set-up-redis12",
         )
-        q3.tag.add(tags[0], tags[1], tags[3])
+        q3.tag.add(tags["python"], tags["django"], tags["docker"])
 
-        c1 = Comments.objects.create(
+        self.stdout.write("  Created 3 questions (with M2M tag relations)")
+
+        # ── Comments ──
+        Comments.objects.create(
             question=q1,
             author=users[1],
-            body="Do not know"
+            text="Install celery and configure the broker URL in settings.",
         )
-        c2 = Comments.objects.create(
+        Comments.objects.create(
             question=q2,
-            author=users[3],
-            body="Do not know"
-        )
-        c3 = Comments.objects.create(
-            question=q3,
             author=users[2],
-            body="Do not know"
+            text="Use docker compose with proper service names for networking.",
         )
+        Comments.objects.create(
+            question=q3,
+            author=users[0],
+            text="Make sure Redis is running and the host is set correctly.",
+        )
+        self.stdout.write("  Created 3 comments (with FK relations)\n")
 
-
-
-        # Flush all data from the database without confirmation
-        os.system("python manage.py flush --noinput")
-
-        # Recheck and apply any pending migrations
-        os.system("python manage.py makemigrations")
-        os.system("python manage.py migrate")
+        # ── Summary ──
+        self.stdout.write(
+            self.style.SUCCESS(
+                "Seeding complete!\n"
+                f"  Users:     {len(users)}\n"
+                f"  Tags:      {len(tags)}\n"
+                f"  Questions: 3\n"
+                f"  Comments:  3\n"
+                f"  FK links:  question->author, comment->author, comment->question\n"
+                f"  M2M links: question->tags"
+            )
+        )
