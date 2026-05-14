@@ -14,10 +14,12 @@ def create_user(email, password="test123!") -> CustomUser:
         last_name="User",
     )
 
+
 @pytest.mark.django_db(transaction=True)
 class TestOpenConsumers:
 
     url = "ws/chat/public/"
+
     @pytest.mark.asyncio
     async def test_public_connect(self):
         communicator = WebsocketCommunicator(PublicChatConsumer.as_asgi(), self.url)
@@ -30,8 +32,6 @@ class TestOpenConsumers:
         assert response["type"] == "welcome"
 
         await communicator.disconnect()
-
-    
 
     @pytest.mark.asyncio
     async def test_public_message_broadcast(self):
@@ -65,10 +65,11 @@ class TestOpenConsumers:
         await alice.disconnect()
         await bob.disconnect()
 
-@pytest.mark.django_db(transaction=True)  
+
+@pytest.mark.django_db(transaction=True)
 class TestAdminConsumers:
     url = "ws/chat/admin/"
-    
+
     @pytest.mark.asyncio
     async def test_admin_connect(self):
         communicator = WebsocketCommunicator(AdminChatConsumer.as_asgi(), self.url)
@@ -81,7 +82,6 @@ class TestAdminConsumers:
         assert response["type"] == "welcome"
 
         await communicator.disconnect()
-
 
     @pytest.mark.asyncio
     async def test_admin_invite_creates_group(self):
@@ -101,10 +101,12 @@ class TestAdminConsumers:
         await member.receive_json_from()  # welcome
 
         # Admin invites member by user ID
-        await admin.send_json_to({
-            "type": "invite",
-            "members": [user_member.id],
-        })
+        await admin.send_json_to(
+            {
+                "type": "invite",
+                "members": [user_member.id],
+            }
+        )
 
         # Member receives the invite
         response = await member.receive_json_from()

@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.mark.django_db
 class TestListTags:
     url = "/api/tags/list"
@@ -12,17 +13,18 @@ class TestListTags:
             }
         }
         from django.core.cache import cache
+
         cache.clear()
 
     def test_list_tags_cache_hit(self, api_client, tag):
-            api_client.get(self.url)
-            
-            tag.delete()
-            
-            response = api_client.get(self.url)
-            assert response.status_code == 200
-            assert len(response.data) > 0
-            assert response.data[0]['slug'] == "python" 
+        api_client.get(self.url)
+
+        tag.delete()
+
+        response = api_client.get(self.url)
+        assert response.status_code == 200
+        assert len(response.data) > 0
+        assert response.data[0]["slug"] == "python"
 
     def test_list_tags_success(self, api_client, tag):
         response = api_client.get(self.url)
@@ -36,7 +38,8 @@ class TestListTags:
 
     def test_list_tags_wrong_method(self, api_client):
         response = api_client.post(self.url, {})
-        assert response.status_code == 401 # unauthenticated
+        assert response.status_code == 401  # unauthenticated
+
 
 @pytest.mark.django_db
 class TestRetrieveTag:
@@ -52,7 +55,7 @@ class TestRetrieveTag:
 
     def test_retrieve_tag_wrong_method(self, api_client, tag):
         response = api_client.post(f"/api/tags/{tag.slug}/retrieve", {})
-        assert response.status_code == 405 # POST is not allowed (405)
+        assert response.status_code == 405  # POST is not allowed (405)
 
     def test_retrieve_tag_cache_hit(self, api_client, tag, question):
         url = f"/api/tags/{tag.slug}/retrieve"
@@ -90,4 +93,5 @@ class TestCreateTag:
         response = auth_client.post(self.url, {"name": "Django"})
         assert response.status_code == 201
         from django.core.cache import cache
-        assert cache.get('tags_list') is None
+
+        assert cache.get("tags_list") is None
