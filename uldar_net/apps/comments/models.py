@@ -1,23 +1,14 @@
 # Python imports
-from typing import Any
 
 # Django imports
-from django.db.models import (
-    Model,
-    Manager,
-    CharField, 
-    TextField,
-    DateTimeField, 
-    ManyToManyField,
-    ForeignKey, 
-    CASCADE,
-    PROTECT
-    )
+from django.db.models import CASCADE, PROTECT, ForeignKey, Manager, TextField
+
+from apps.abstract.models import AbstractBaseModel
 
 # Project imports
 from apps.questions.models import Question
 from apps.users.models import CustomUser
-from apps.abstract.models import AbstractBaseModel
+
 
 class CommentManager(Manager):
     def get_queryset(self):
@@ -30,7 +21,7 @@ class CommentManager(Manager):
 
 class Comments(AbstractBaseModel):
     MAX_TEXT_LENGTH = 300
-    
+
     question = ForeignKey(
         to=Question,
         on_delete=CASCADE

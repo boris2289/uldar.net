@@ -1,7 +1,7 @@
-# Python imports 
-from decouple import config
-from datetime import timedelta
+# Python imports
 import os
+
+from decouple import config
 
 # Project modules
 

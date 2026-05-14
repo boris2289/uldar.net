@@ -6,18 +6,18 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 
-from apps.questions.serializers import QuestionListSerializer
-from apps.tags.serializers import (
-    TagCreateSerializer,
-    TagDetailSerializer,
-    TagListSerializer,
-)
 from apps.common.responses import (
     ERROR_401,
     ERROR_403,
     ERROR_404,
     ERROR_429,
     VALIDATION_400,
+)
+from apps.questions.serializers import QuestionListSerializer
+from apps.tags.serializers import (
+    TagCreateSerializer,
+    TagDetailSerializer,
+    TagListSerializer,
 )
 
 tag_retrieve_response = inline_serializer(

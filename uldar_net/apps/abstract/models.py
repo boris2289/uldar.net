@@ -1,9 +1,8 @@
 # Python modules
 from typing import Any
 
-
 # Django modules
-from django.db.models import Model, DateTimeField
+from django.db.models import DateTimeField, Model
 from django.utils import timezone as django_timezone
 
 

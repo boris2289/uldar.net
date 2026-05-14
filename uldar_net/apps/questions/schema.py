@@ -12,19 +12,18 @@ from apps.comments.serializers import (
     CommentListSerializer,
     NestedCommentCreateSerializer,
 )
-from apps.questions.serializers import (
-    QuestionCreateSerializer,
-    QuestionDetailSerializer,
-    QuestionListSerializer,
-    QuestionUpdateSerializer,
-)
 from apps.common.responses import (
-    ERROR_400,
     ERROR_401,
     ERROR_403,
     ERROR_404,
     ERROR_429,
     VALIDATION_400,
+)
+from apps.questions.serializers import (
+    QuestionCreateSerializer,
+    QuestionDetailSerializer,
+    QuestionListSerializer,
+    QuestionUpdateSerializer,
 )
 
 question_retrieve_response = inline_serializer(

@@ -1,17 +1,17 @@
 # Python imports
 from logging import getLogger
 
+from django.core.cache import cache
+
 # Django imports
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiResponse,
     extend_schema,
-    extend_schema_view,
     inline_serializer,
 )
-from django.core.cache import cache
-from django.utils.translation import gettext_lazy as _
 
 # Rest-Framework imports
 from rest_framework import serializers
@@ -26,6 +26,14 @@ from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from rest_framework.viewsets import ViewSet
 
+from apps.common.responses import (
+    ERROR_401,
+    ERROR_403,
+    ERROR_404,
+    ERROR_429,
+    VALIDATION_400,
+)
+
 # Project imports
 from apps.questions.models import Question
 from apps.questions.serializers import QuestionListSerializer
@@ -34,14 +42,6 @@ from apps.tags.serializers import (
     TagCreateSerializer,
     TagDetailSerializer,
     TagListSerializer,
-)
-from apps.tags.schema import tag_schema
-from apps.common.responses import (
-    ERROR_401,
-    ERROR_403,
-    ERROR_404,
-    ERROR_429,
-    VALIDATION_400,
 )
 
 tag_retrieve_response = inline_serializer(
@@ -183,12 +183,12 @@ class TagViewSet(ViewSet):
 
         tag = Tag.objects.filter(name=data["name"]).first()
         if tag is None:
-            logger.info(f"New tag created", extra=log_extra)
+            logger.info("New tag created", extra=log_extra)
             tag = Tag.objects.create(name=data["name"], slug=slugify(data["name"]))
             cache.delete("tags_list")
             logger.info("Tags got deleted from cache", extra=log_extra)
         else:
-            logger.info(f"Existing tag returned for name", extra=log_extra)
+            logger.info("Existing tag returned for name", extra=log_extra)
         return DRFResponse(TagDetailSerializer(tag).data, status=HTTP_201_CREATED)
 
     @extend_schema(

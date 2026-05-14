@@ -1,44 +1,30 @@
 # Python imports
-from typing import Any, Optional
 from logging import getLogger
+from typing import Any
 
 # Django imports
-from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-
-# Rest-Framework imports
-from rest_framework.viewsets import ViewSet
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiResponse,
+    extend_schema,
+    inline_serializer,
+)
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.request import Request as DRFRequest
+from rest_framework.response import Response as DRFResponse
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_201_CREATED,
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,
 )
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.request import Request as DRFRequest
-from rest_framework.response import Response as DRFResponse
-from rest_framework_simplejwt.tokens import RefreshToken
-from drf_spectacular.utils import (
-    OpenApiExample,
-    OpenApiResponse,
-    extend_schema,
-    extend_schema_view,
-    inline_serializer,
-)
 
-# Project imports
-from apps.users.models import CustomUser
-from apps.users.serializers import (
-    UserLoginSerializer,
-    UserLoginFailSerializer,
-    UserRegisterResponseSerializer,
-    UserRegisterFailSerializer,
-    UserRegisterSerializer,
-    UserTimezoneUpdateSerializer,
-    UserLanguageUpdateSerializer,
-)
-from apps.users.decorators import validate_serializer_data
+# Rest-Framework imports
+from rest_framework.viewsets import ViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
+
 from apps.common.responses import (
     ERROR_401,
     ERROR_403,
@@ -47,6 +33,16 @@ from apps.common.responses import (
     VALIDATION_400,
 )
 from apps.tasks import send_confirmation_mail
+from apps.users.decorators import validate_serializer_data
+
+# Project imports
+from apps.users.models import CustomUser
+from apps.users.serializers import (
+    UserLanguageUpdateSerializer,
+    UserLoginSerializer,
+    UserRegisterSerializer,
+    UserTimezoneUpdateSerializer,
+)
 
 logger = getLogger("django")
 

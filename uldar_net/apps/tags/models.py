@@ -1,17 +1,7 @@
 # Python imports
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Django imports
 from django.db import models
-from django.db.models import (
-    Model,
-    CharField,
-    IntegerField,
-    ForeignKey,
-    CASCADE,
-    SlugField,
-    TextField,
-)
 from django.utils.translation import gettext_lazy as _
 
 # Project imports

@@ -1,26 +1,24 @@
 # Python imports
-from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Django imports
 from django.db.models import (
-    CharField,
-    IntegerField,
-    ForeignKey,
     CASCADE,
+    BooleanField,
+    CharField,
+    Count,
+    ForeignKey,
+    Manager,
+    ManyToManyField,
     SlugField,
     TextField,
-    ManyToManyField,
-    DateTimeField,
-    BooleanField,
-    Manager,
-    Count,
 )
 from django.utils.translation import gettext_lazy as _
+
+from apps.abstract.models import AbstractBaseModel
 
 # Project imports
 from apps.tags.models import Tag
 from apps.users.models import CustomUser
-from apps.abstract.models import AbstractBaseModel
 
 
 class QuestionManager(Manager):

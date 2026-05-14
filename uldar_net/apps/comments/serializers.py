@@ -1,6 +1,7 @@
-from rest_framework.serializers import ModelSerializer, Serializer, CharField, EmailField
+from rest_framework.serializers import CharField, EmailField, ModelSerializer, Serializer
 
 from apps.comments.models import Comments
+
 
 class CommentBaseSerializer(ModelSerializer):
     class Meta:

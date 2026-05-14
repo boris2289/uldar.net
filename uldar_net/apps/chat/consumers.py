@@ -1,6 +1,5 @@
 # Python imports
-import uuid 
-
+import uuid
 
 # Channels imports
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -23,7 +22,7 @@ class AdminChatConsumer(AsyncJsonWebsocketConsumer):
     async def receive_json(self, content):
         if content["type"] == "invite":
             chat_id = str(uuid.uuid4())
-            
+
             for member in content["members"]:
                 await self.channel_layer.group_send(f"user_{member}", {
                     "type": "chat.invite",
@@ -43,7 +42,7 @@ class AdminChatConsumer(AsyncJsonWebsocketConsumer):
                 "id": content["id"]
             })
 
-            
+
     async def chat_invite(self, event):
         await self.channel_layer.group_add(event["id"], self.channel_name)
         await self.send_json(event)
@@ -73,10 +72,10 @@ class PublicChatConsumer(AsyncJsonWebsocketConsumer):
                 "sender": self.channel_name,
                 "username": self.user.email if self.user.is_authenticated else "anonymus"
             })
-    
+
     async def chat_disconnect(self, event):
         await self.channel_layer.group_discard(self.ROOM_GROUP, self.channel_name)
-    
+
     async def chat_message(self, event):
         if event["sender"] != self.channel_name:
             await self.send_json({
@@ -84,7 +83,7 @@ class PublicChatConsumer(AsyncJsonWebsocketConsumer):
                 "message": event["message"],
                 "username": event["username"],
             })
-    
 
-    
+
+
 

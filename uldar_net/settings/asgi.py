@@ -1,15 +1,17 @@
 # Python modules
 import os
 
-# Django modules
-from django.core.asgi import get_asgi_application
+from channels.auth import AuthMiddlewareStack
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
-from channels.auth import AuthMiddlewareStack
+
+# Django modules
+from django.core.asgi import get_asgi_application
+
+from apps.chat.routing import websocket_urlpatterns
 
 # Project modules
 from settings.conf import ENV_ID, ENV_POSSIBLE_OPTIONS
-from apps.chat.routing import websocket_urlpatterns
 
 assert (
     ENV_ID in ENV_POSSIBLE_OPTIONS
