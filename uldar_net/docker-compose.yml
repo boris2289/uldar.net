@@ -1,0 +1,43 @@
+services:
+  django:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: django_docker
+    command: "daphne -b 0.0.0.0 -p 8000 settings.asgi:application"
+    volumes: 
+      - .:/app
+    working_dir: /app
+
+    ports:
+      - "8000:8000"
+    depends_on:
+      - pgdb
+  pgdb:
+    env_file: ".env"
+    image: postgres
+    container_name: pgdb
+    environment:
+      - POSTGRES_USER=${ULDAR_NET_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${ULDAR_NET_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${ULDAR_NET_POSTGRES_DB_NAME}
+  
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${ULDAR_NET_CHANNELS_REDIS_PORT}:${ULDAR_NET_CHANNELS_REDIS_PORT}"
+     
+  celery_worker:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery_worker
+    command: "celery -A uldar_net worker -l info"
+    volumes:
+      - .:/app
+    working_dir: /app
+    env_file: ".env"
+    depends_on:
+      - redis
+      - pgdb
+  
