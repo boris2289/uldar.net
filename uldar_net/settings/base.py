@@ -1,9 +1,10 @@
-# Python imports
 from pathlib import Path
 import os
 
 # Project imports
 from settings.conf import *
+
+
 
 # ----------------------------------------------
 # Path
@@ -11,7 +12,7 @@ from settings.conf import *
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_URLCONF = "settings.urls"
 WSGI_APPLICATION = "settings.wsgi.application"
-AUTH_USER_MODEL = "users.CustomUser"
+AUTH_USER_MODEL = 'users.CustomUser'
 
 IMPORTED_APPS = [
     "django.contrib.admin",
@@ -30,7 +31,7 @@ PROJECT_APPS = [
     "apps.tags",
     "apps.questions",
     "apps.comments",
-    "apps.abstract",
+    'apps.abstract'
 ]
 
 INSTALLED_APPS = PROJECT_APPS + IMPORTED_APPS
@@ -40,7 +41,6 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -81,25 +81,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# ----------------------------------------------
-# Internationalization and Localization
-LANGUAGE_CODE = "ru"
+LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
-USE_L10N = True
 USE_TZ = True
-LANGUAGES = [("en", "English"), ("ru", "Russian"), ("kk", "Kazakh")]
-LOCALE_PATHS = [os.path.join(BASE_DIR, "locale")]
-
-# ----------------------------------------------
-# Static files
-
 
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# ----------------------------------------------
-# Third-party settings
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Uldar Blog API",
@@ -117,14 +105,14 @@ SPECTACULAR_SETTINGS = {
         {"name": "Comments", "description": "Comment endpoints."},
         {"name": "Docs", "description": "OpenAPI schema and UI endpoints."},
     ],
-    "EXCLUDE_PATHS": [
-        "/api/user/token/refresh/",
-        # http://127.0.0.1:8000/api/user/token/refresh/
+    'EXCLUDE_PATHS': [
+        '/api/user/token/refresh/',
+        #http://127.0.0.1:8000/api/user/token/refresh/
     ],
 }
 
 # Logging
-LOG_DIR = os.path.join(BASE_DIR, "logs")
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
 
 LOGGING = {
     "version": 1,
@@ -162,22 +150,22 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["file", "console"],  # Sends logs to both file and terminal
-            "level": "INFO",
+            "handlers": ["file", "console"], # Sends logs to both file and terminal
+            "level": "INFO", 
             "propagate": True,
         },
     },
 }
 
-# Redis - Caching
+# Redis - Caching 
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}"
     }
 }
 
-# Celery
+# Celery 
 _celery_redis_url = f"redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_CELERY_DB}"  # noqa: F405
 CELERY_BROKER_URL = _celery_redis_url
 CELERY_RESULT_BACKEND = _celery_redis_url
@@ -189,22 +177,14 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 
 
-# Celery Beat
-CELERY_BEAT_SCHEDULE = {
-    "cleanup-expired-sessions-every-hour": {
-        "task": "apps.tasks.cleanup_expired_sessions",
-        "schedule": 3600,  # every hour in seconds
-    },
-}
-
-# Channels
+# Channels 
 CHANNELS_REDIS_HOST = ULDAR_NET_CHANNELS_REDIS_HOST
 CHANNELS_REDIS_PORT = ULDAR_NET_CHANNELS_REDIS_PORT
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
+CHANNEL_LAYERS =  {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
             "hosts": [f"redis://{CHANNELS_REDIS_HOST}:{CHANNELS_REDIS_PORT}/3"],
         },
     },
