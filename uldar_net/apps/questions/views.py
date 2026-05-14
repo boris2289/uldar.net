@@ -2,18 +2,18 @@
 import uuid
 from logging import getLogger
 
+from django.core.cache import cache
+
 # Django imports
 from django.utils.text import slugify
-from django.core.cache import cache
+from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import (
     OpenApiExample,
     OpenApiParameter,
     OpenApiResponse,
     extend_schema,
-    extend_schema_view,
     inline_serializer,
 )
-from django.utils.translation import gettext_lazy as _
 
 # Rest-Framework imports
 from rest_framework import serializers
@@ -36,21 +36,19 @@ from apps.comments.serializers import (
     CommentListSerializer,
     NestedCommentCreateSerializer,
 )
+from apps.common.responses import (
+    ERROR_401,
+    ERROR_403,
+    ERROR_404,
+    ERROR_429,
+    VALIDATION_400,
+)
 from apps.questions.models import Question
 from apps.questions.serializers import (
     QuestionCreateSerializer,
     QuestionDetailSerializer,
     QuestionListSerializer,
     QuestionUpdateSerializer,
-)
-from apps.questions.schema import question_schema
-from apps.common.responses import (
-    VALIDATION_400,
-    ERROR_400,
-    ERROR_401,
-    ERROR_403,
-    ERROR_404,
-    ERROR_429,
 )
 
 question_retrieve_response = inline_serializer(

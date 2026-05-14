@@ -1,11 +1,10 @@
 # Python imports
 
 # Django imports
-from django.urls import path, include
+from django.urls import include, path
 
 # Rest-Framework imports
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenRefreshView
 
 # Project imports
 from apps.users.views import CustomUserViewSet

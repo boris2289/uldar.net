@@ -11,7 +11,6 @@ from rest_framework import serializers
 from apps.comments.serializers import CommentCreateSerializer, CommentListSerializer, CommentUpdateSerializer
 from apps.common.responses import ERROR_401, ERROR_403, ERROR_404, ERROR_429, VALIDATION_400
 
-
 comment_update_response = inline_serializer(
     name="CommentUpdateResponse",
     fields={

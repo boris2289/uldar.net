@@ -1,26 +1,28 @@
 # Python imports
 from typing import Any
 
-# Django imports
-from django.db.models import (
-    CharField,
-    EmailField,
-    BooleanField,
-    ImageField,
-    DateTimeField,
-)
 from django.contrib.auth.models import (
     AbstractBaseUser,
-    PermissionsMixin,
     BaseUserManager,
+    PermissionsMixin,
 )
-from django.core.exceptions import ValidationError
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+
+# Django imports
+from django.db.models import (
+    BooleanField,
+    CharField,
+    DateTimeField,
+    EmailField,
+    ImageField,
+)
 from django.utils.translation import gettext_lazy as _
+
+from apps.abstract.models import AbstractBaseModel
 
 # Project imports
 from apps.users.validators import check_domain_name
-from apps.abstract.models import AbstractBaseModel
 
 
 class CustomUserManager(BaseUserManager):
@@ -162,6 +164,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, AbstractBaseModel):
         help_text=_("True if user is part of company"),
     )
 
+
     avatar = ImageField(blank=True, null=True, verbose_name=_("User avatar"))
 
     preffered_language = CharField(
@@ -172,6 +175,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, AbstractBaseModel):
     )
 
     timezone = CharField(max_length=50, default="UTC", verbose_name=_("User timezone"))
+
+    created_at = DateTimeField(auto_now_add=True, null=True)
+    updated_at = DateTimeField(auto_now=True, null=True)
+    deleted_at = DateTimeField(null=True, blank=True)
 
     REQUIRED_FIELDS = ["last_name", "first_name"]
     USERNAME_FIELD = "email"

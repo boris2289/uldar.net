@@ -1,5 +1,5 @@
 # Django imports
-from django.urls import path, include
+from django.urls import include, path
 
 # Rest framework imports
 from rest_framework.routers import DefaultRouter

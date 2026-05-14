@@ -1,16 +1,14 @@
 # Django imports
-from django.urls import path, include
-
+from django.urls import include, path
 
 # Rest framework imports
 from rest_framework.routers import DefaultRouter
 
-
-# Project imports 
+# Project imports
 from apps.comments.views import CommentViewSet
 
 router : DefaultRouter = DefaultRouter(
-    trailing_slash = False 
+    trailing_slash = False
 )
 
 router.register(

@@ -1,14 +1,8 @@
 
 
 # Rest-Framework imports
-from rest_framework import serializers
-from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.request import Request as DRFRequest
-from rest_framework.response import Response as DRFResponse
-from rest_framework.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_403_FORBIDDEN, HTTP_404_NOT_FOUND
-from rest_framework.viewsets import ViewSet
 from logging import getLogger
+
 from django.core.cache import cache
 
 # DRF imports
@@ -17,19 +11,31 @@ from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
     extend_schema,
-    extend_schema_view,
     inline_serializer,
 )
+from rest_framework import serializers
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.request import Request as DRFRequest
+from rest_framework.response import Response as DRFResponse
+from rest_framework.status import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_400_BAD_REQUEST,
+    HTTP_403_FORBIDDEN,
+    HTTP_404_NOT_FOUND,
+)
+from rest_framework.viewsets import ViewSet
 
 # Project imports
 from apps.comments.models import Comments
 from apps.comments.serializers import (
-    CommentCreateSerializer, 
-    CommentListSerializer, 
+    CommentCreateSerializer,
+    CommentListSerializer,
+    CommentRetrieveSerializer,
     CommentUpdateSerializer,
-    CommentRetrieveSerializer)
-from apps.comments.schema import comment_schema
-from apps.common.responses import ERROR_400, ERROR_401, ERROR_403, ERROR_404, ERROR_429, VALIDATION_400
+)
+from apps.common.responses import ERROR_401, ERROR_403, ERROR_404, ERROR_429, VALIDATION_400
 
 comment_update_response = inline_serializer(
     name="CommentUpdateResponse",
@@ -95,20 +101,20 @@ class CommentViewSet(ViewSet):
             ),
         ],
     )
-    
-    
+
+
     @action(methods=["GET"], permission_classes=[AllowAny], url_path="list", detail=False)
     def list_comments(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         comments = cache.get("list_comments")
         if comments is not None:
-            return DRFResponse(comments, status=HTTP_200_OK) 
-        
+            return DRFResponse(comments, status=HTTP_200_OK)
+
         comments = Comments.objects.all()
         serializer = CommentListSerializer(comments, many=True)
         cache.set("list_comments", serializer.data)
         return DRFResponse(serializer.data, status=HTTP_200_OK)
-    
-    
+
+
     @extend_schema(
         tags=["Comments"],
         summary="Create a new comment",
@@ -147,7 +153,7 @@ class CommentViewSet(ViewSet):
                 author=request.user,
                 question=serializer.validated_data["question"],
             )
-            
+
             cache.delete("list_comments")
             question_slug = comment.question.slug
             cache.delete(f"question_comment_{question_slug}")
@@ -158,7 +164,7 @@ class CommentViewSet(ViewSet):
             log_extra['error_detail'] = str(e)
             logger.warning("Creation of Comment failed", extra=log_extra)
             return DRFResponse({"detail": "Comment creation failed"}, status=500)
-        
+
     @extend_schema(
         tags=["Comments"],
         summary="Retrieve comment by ID",
@@ -167,7 +173,7 @@ class CommentViewSet(ViewSet):
         request=None,
         responses={
             200: OpenApiResponse(
-                response=CommentRetrieveSerializer, 
+                response=CommentRetrieveSerializer,
                 description="Comment was retrieved successfully."
             ),
             401: ERROR_401,
@@ -189,14 +195,14 @@ class CommentViewSet(ViewSet):
                 },
             ),
             OpenApiExample(
-                "Comment not found example", 
-                response_only=True, 
-                status_codes=["404"], 
+                "Comment not found example",
+                response_only=True,
+                status_codes=["404"],
                 value={"detail": "The comment does not exist"}
             ),
         ],
     )
-    
+
     @action(methods=["GET"], permission_classes=[AllowAny], url_path="retrieve", detail=True)
     def retrieve_comment(self, request: DRFRequest, *args, **kwargs) -> DRFResponse:
         log_extra = self._get_log_context(request)
@@ -206,14 +212,14 @@ class CommentViewSet(ViewSet):
             return DRFResponse(
                 {"data": cache_data},
                 status=HTTP_200_OK,
-            ) 
+            )
         try:
             comment = Comments.objects.get(pk=pk)
         except Comments.DoesNotExist:
             logger.warning(f"Retrieve of Comment {pk} failed: Comment does not exist", extra=log_extra)
             return DRFResponse({"detail": "The comment does not exist"}, status=HTTP_404_NOT_FOUND)
 
-        
+
         serializer = CommentRetrieveSerializer(comment)
         cache.set(f"comment_pk_{kwargs.get("pk")}", serializer.data, timeout=600)
         logger.info("Retrieve of Comment by pk is successful", extra=log_extra)
@@ -279,7 +285,7 @@ class CommentViewSet(ViewSet):
             },
             status=HTTP_200_OK,
         )
-    
+
 
     @extend_schema(
         tags=["Comments"],
@@ -307,7 +313,7 @@ class CommentViewSet(ViewSet):
         log_extra = self._get_log_context(request)
         cached_data = cache.get(f"comment_by_author_{author_id}")
         if cached_data is not None:
-            return DRFResponse(cached_data, status=HTTP_200_OK) 
+            return DRFResponse(cached_data, status=HTTP_200_OK)
 
         if not author_id:
             logger.warning('list_comments_by_author no author in request', extra=log_extra)

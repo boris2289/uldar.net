@@ -1,16 +1,14 @@
 # Python modules
 from functools import wraps
-from typing import Any, Optional, Callable, Type, TypeVar
+from typing import Any, Callable, Optional, Type, TypeVar
 
 # Django modules
-from django.db.models import Model, Manager, QuerySet
+from django.db.models import Model
 from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.serializers import Serializer
 from rest_framework.status import (
     HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-    HTTP_429_TOO_MANY_REQUESTS,
 )
 
 # Project modules

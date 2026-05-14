@@ -1,7 +1,8 @@
 import pytest
-from apps.chat.consumers import PublicChatConsumer, AdminChatConsumer
-from channels.testing import WebsocketCommunicator
 from channels.db import database_sync_to_async
+from channels.testing import WebsocketCommunicator
+
+from apps.chat.consumers import AdminChatConsumer, PublicChatConsumer
 from apps.users.models import CustomUser
 
 

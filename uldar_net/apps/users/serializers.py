@@ -1,20 +1,22 @@
 # Python imports
 from typing import Any, Optional
 
+from django.contrib.auth.password_validation import validate_password
+
 # Django imports
 from django.core.exceptions import ValidationError
-from django.contrib.auth.password_validation import validate_password
 from django.utils.translation import gettext_lazy as _
 
 # Rest-Framework imports
 from rest_framework.serializers import (
-    Serializer,
-    ModelSerializer,
     CharField,
+    ChoiceField,
     EmailField,
     IntegerField,
     ListField,
-    ChoiceField,
+    Serializer,
+)
+from rest_framework.serializers import (
     ValidationError as DRFValidationError,
 )
 
