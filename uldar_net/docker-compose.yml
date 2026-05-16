@@ -16,7 +16,7 @@ services:
       - redis
 
   pgdb:
-    image: postgres
+    image: postgres:16
     container_name: pgdb
     env_file: ".env"
     environment:
